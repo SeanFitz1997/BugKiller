@@ -1,0 +1,10 @@
+{
+	"headers": {
+        "cognito:username": "U1"
+    },
+    "body": {
+        "manager": "M1",
+        "title": "P1",
+        "description": "Test Project"
+    }
+}

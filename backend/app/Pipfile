@@ -9,7 +9,6 @@ pytest = "*"
 [packages]
 pynamodb = "*"
 arrow = "*"
-pydantic = "*"
 
 [requires]
 python_version = "3.8"

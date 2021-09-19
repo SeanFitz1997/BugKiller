@@ -1,0 +1,12 @@
+{
+	"headers": {
+		"cognito:username": "M1"
+	},
+	"pathParameters": {
+		"projectId": "97cbe7b1-a5c9-4702-b347-aadc8284d174"
+	},
+	"body": {
+		"title": "Updated Title",
+		"description": "Updated Description"
+	}
+}

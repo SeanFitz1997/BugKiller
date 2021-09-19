@@ -1,4 +1,5 @@
-from pynamodb.attributes import MapAttribute, UnicodeAttribute, UTCDateTimeAttribute
+from pynamodb.attributes import (MapAttribute, UnicodeAttribute,
+                                 UTCDateTimeAttribute)
 
 
 class BugResolutionMapAttribute(MapAttribute):
