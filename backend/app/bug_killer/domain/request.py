@@ -41,8 +41,10 @@ def get_optional_query_param(evt: Dict[str, Any], param_name: str, default=None)
     return _get_param(evt, 'queryStringParameters', param_name, default=default)
 
 
-def get_auth_header(evt: Dict[str, Any]) -> str:
+def get_auth_user(evt: Dict[str, Any]) -> str:
     try:
-        return get_header_param(evt, 'cognito:username')
-    except MissingRequiredRequestParamException:
-        raise MissingAuthHeaderException()
+        request_ctx = evt['requestContext']
+        claims = request_ctx['authorizer']['claims']
+        return claims['cognito:username']
+    except KeyError as e:
+        raise MissingAuthHeaderException() from e

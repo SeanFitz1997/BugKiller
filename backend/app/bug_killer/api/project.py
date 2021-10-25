@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict
 
 from bug_killer.access.entities import (
@@ -10,7 +11,7 @@ from bug_killer.domain.request import (
     get_body_param,
     get_optional_body_param,
     get_path_param,
-    get_auth_header
+    get_auth_user
 )
 from bug_killer.domain.response import (
     OkResponse,
@@ -29,8 +30,14 @@ from bug_killer.models.dto.project import (
 
 
 @handle_exception_responses
-def get_user_projects_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
-    user_id = get_auth_header(evt)
+def get_user_projects_handler(evt: Dict[str, Any], ctx) -> Dict[str, Any]:
+    print('HERE')
+    print(f'{evt =}')
+    print(f'{ctx =}, {dir(ctx)}')
+    print(f'{ctx.identity}')
+    print(f'{dir(ctx.identity)}')
+    print(f'{ctx.identity.cognito_identity_id} , {ctx.identity.cognito_identity_pool_id}')
+    user_id = get_auth_user(evt)
     manager_projects, member_projects = get_users_projects(user_id)
     rsp = UserProjectsResponse(manager_projects, member_projects)
     return OkResponse(body=rsp.to_dict()).to_api_dict()
@@ -38,7 +45,8 @@ def get_user_projects_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
 @handle_exception_responses
 def create_project_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
-    user_id = get_auth_header(evt)
+    logging.info(f'{evt =}')
+    user_id = get_auth_user(evt)
     payload = CreateProjectPayload(
         manager=user_id,
         title=get_body_param(evt, "title"),
@@ -53,7 +61,8 @@ def create_project_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
 @handle_exception_responses
 def update_project_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
-    user_id = get_auth_header(evt)
+    logging.info(f'{evt =}')
+    user_id = get_auth_user(evt)
     payload = UpdateProjectPayload(
         project_id=get_path_param(evt, 'projectId'),
         actor=user_id,
@@ -68,7 +77,8 @@ def update_project_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
 @handle_exception_responses
 def delete_project_handler(evt: Dict[str, Any], _):
-    user_id = get_auth_header(evt)
+    logging.info(f'{evt =}')
+    user_id = get_auth_user(evt)
     payload = DeleteProjectPayload(
         actor=user_id,
         project_id=get_path_param(evt, "projectId")

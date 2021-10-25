@@ -73,7 +73,7 @@ def test_get_user_projects_handler(
     (
             create_event(headers={'cognito:username': 'create_projects_user'}),
             HttpStatusCodes.BAD_REQUEST_STATUS,
-            message_body('Missing required body parameter "title" in request')
+            message_body("Missing required body parameter 'title' in request")
     )
 ])
 def test_create_project_handler_invalid_request(evt, expected_status, expected_body):
