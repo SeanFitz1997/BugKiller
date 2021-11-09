@@ -31,12 +31,6 @@ from bug_killer.models.dto.project import (
 
 @handle_exception_responses
 def get_user_projects_handler(evt: Dict[str, Any], ctx) -> Dict[str, Any]:
-    print('HERE')
-    print(f'{evt =}')
-    print(f'{ctx =}, {dir(ctx)}')
-    print(f'{ctx.identity}')
-    print(f'{dir(ctx.identity)}')
-    print(f'{ctx.identity.cognito_identity_id} , {ctx.identity.cognito_identity_pool_id}')
     user_id = get_auth_user(evt)
     manager_projects, member_projects = get_users_projects(user_id)
     rsp = UserProjectsResponse(manager_projects, member_projects)

@@ -31,14 +31,20 @@ def create_event(
         headers: Optional[Dict] = None,
         path: Optional[Dict] = None,
         query: Optional[Dict] = None,
-        body: Optional[Dict] = None
+        body: Optional[Dict] = None,
+        request_context: Optional[Dict] = None
 ) -> Dict:
     return {
         'headers': headers or {},
         'pathParameters': path or {},
         'queryStringParameters': query or {},
-        'body': body or {}
+        'body': body or {},
+        'requestContext': request_context or {}
     }
+
+
+def create_cognito_authorizer_request_context(user_name: str) -> Dict:
+    return {'authorizer': {'claims': {'cognito:username': user_name}}}
 
 
 def assert_response(

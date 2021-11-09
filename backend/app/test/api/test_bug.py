@@ -9,7 +9,8 @@ from test.helpers import (
     create_event,
     assert_response,
     assert_dict_attributes_not_none,
-    assert_dict_attributes_equals
+    assert_dict_attributes_equals,
+    create_cognito_authorizer_request_context
 )
 from test.test_doubles.db.projects import (
     populate_project_table_with_project_items,
@@ -30,13 +31,13 @@ _ = populate_project_table_with_project_items
             message_body('Missing authorization header value')
     ),
     (
-            create_event(headers={'cognito:username': 'create_bug_user'}),
+            create_event(request_context=create_cognito_authorizer_request_context('create_bug_user')),
             HttpStatusCodes.BAD_REQUEST_STATUS,
             message_body('Missing required body parameter "projectId" in request')
     ),
     (
             create_event(
-                headers={'cognito:username': 'invalid user'},
+                request_context=create_cognito_authorizer_request_context('invalid user'),
                 body={
                     'projectId': api_project_add_bug.id,
                     'title': 'test',
@@ -50,7 +51,7 @@ _ = populate_project_table_with_project_items
     ),
     (
             create_event(
-                headers={'cognito:username': 'create_bug_user'},
+                request_context=create_cognito_authorizer_request_context('create_bug_user'),
                 body={
                     'projectId': 'Does not exist',
                     'title': 'test',
@@ -82,7 +83,7 @@ def test_create_bug_handler_valid_request(populate_project_table_with_project_it
         'tags': tags
     }
     evt = create_event(
-        headers={'cognito:username': api_project_add_bug.manager},
+        request_context=create_cognito_authorizer_request_context(api_project_add_bug.manager),
         body=payload
     )
 
@@ -102,13 +103,13 @@ def test_create_bug_handler_valid_request(populate_project_table_with_project_it
             message_body('Missing authorization header value')
     ),
     (
-            create_event(headers={'cognito:username': 'user'}),
+            create_event(request_context=create_cognito_authorizer_request_context('user')),
             HttpStatusCodes.BAD_REQUEST_STATUS,
             message_body('Missing required body parameter "projectId" in request')
     ),
     (
             create_event(
-                headers={'cognito:username': api_project_delete_bug.manager},
+                request_context=create_cognito_authorizer_request_context(api_project_delete_bug.manager),
                 body={
                     'projectId': api_project_delete_bug.id,
                     'bugId': 'Does not exist'
@@ -119,7 +120,7 @@ def test_create_bug_handler_valid_request(populate_project_table_with_project_it
     ),
     (
             create_event(
-                headers={'cognito:username': api_project_delete_bug.manager},
+                request_context=create_cognito_authorizer_request_context(api_project_delete_bug.manager),
                 body={
                     'projectId': api_project_delete_bug.id,
                     'bugId': api_bug_to_delete.id

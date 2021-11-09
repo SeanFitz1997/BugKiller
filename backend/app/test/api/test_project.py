@@ -16,17 +16,18 @@ from test.helpers import (
     create_event,
     assert_response,
     assert_dict_attributes_not_none,
-    assert_dict_attributes_equals
+    assert_dict_attributes_equals,
+    create_cognito_authorizer_request_context
 )
 from test.test_doubles.db.projects import (
     populate_project_table_with_project_items,
     user_with_projects,
-    user_without_projects,
     manager_project,
     member_projects,
     api_project_to_update,
     api_project_to_delete,
-    api_project_no_op_update
+    api_project_no_op_update,
+    user_without_projects
 )
 
 
@@ -41,12 +42,12 @@ _ = populate_project_table_with_project_items
             message_body('Missing authorization header value')
     ),
     (
-            create_event(headers={'cognito:username': user_without_projects}),
+            create_event(request_context=create_cognito_authorizer_request_context(user_without_projects)),
             HttpStatusCodes.OK_STATUS,
             UserProjectsResponse().to_dict()
     ),
     (
-            create_event(headers={'cognito:username': user_with_projects}),
+            create_event(request_context=create_cognito_authorizer_request_context(user_with_projects)),
             HttpStatusCodes.OK_STATUS,
             UserProjectsResponse(
                 manger_projects=[manager_project],
@@ -65,15 +66,15 @@ def test_get_user_projects_handler(
 
 
 @pytest.mark.parametrize("evt,expected_status,expected_body", [
+    # (
+    #         create_event(),
+    #         HttpStatusCodes.UNAUTHORIZED_STATUS,
+    #         message_body('Missing authorization header value')
+    # ),
     (
-            create_event(),
-            HttpStatusCodes.UNAUTHORIZED_STATUS,
-            message_body('Missing authorization header value')
-    ),
-    (
-            create_event(headers={'cognito:username': 'create_projects_user'}),
+            create_event(request_context=create_cognito_authorizer_request_context('create_projects_user')),
             HttpStatusCodes.BAD_REQUEST_STATUS,
-            message_body("Missing required body parameter 'title' in request")
+            message_body('Missing required body parameter "title" in request')
     )
 ])
 def test_create_project_handler_invalid_request(evt, expected_status, expected_body):
@@ -90,7 +91,7 @@ def test_create_project_handler_valid_request():
     }
     user = 'create_user'
     evt = create_event(
-        headers={'cognito:username': user},
+        request_context=create_cognito_authorizer_request_context(user),
         body=payload
     )
     rsp = create_project_handler(evt, None)
@@ -109,7 +110,7 @@ def test_create_project_handler_valid_request():
     ),
     (
             create_event(
-                headers={'cognito:username': 'invalid user'},
+                request_context=create_cognito_authorizer_request_context('invalid user'),
                 path={'projectId': api_project_to_update.id},
                 body={'manager': 'new manager'}
             ),
@@ -120,7 +121,7 @@ def test_create_project_handler_valid_request():
     ),
     (
             create_event(
-                headers={'cognito:username': 'invalid user'},
+                request_context=create_cognito_authorizer_request_context('invalid user'),
                 path={'projectId': 'does not exist'},
                 body={'manager': 'manager'}
             ),
@@ -140,7 +141,7 @@ def test_update_project_handler_valid_request():
         'description': 'updated description'
     }
     evt = create_event(
-        headers={'cognito:username': api_project_to_update.manager},
+        request_context=create_cognito_authorizer_request_context(api_project_to_update.manager),
         path={'projectId': api_project_to_update.id},
         body=update_payload
     )
@@ -155,7 +156,7 @@ def test_update_project_handler_valid_request():
 
 def test_update_project_handler_no_op_request():
     evt = create_event(
-        headers={'cognito:username': api_project_no_op_update.manager},
+        request_context=create_cognito_authorizer_request_context(api_project_no_op_update.manager),
         path={'projectId': api_project_no_op_update.id},
         body={}
     )
@@ -175,7 +176,7 @@ def test_update_project_handler_no_op_request():
     ),
     (
             create_event(
-                headers={'cognito:username': 'invalid user'},
+                request_context=create_cognito_authorizer_request_context('invalid user'),
                 path={'projectId': api_project_to_delete.id}
             ),
             HttpStatusCodes.UNAUTHORIZED_STATUS,
@@ -185,7 +186,7 @@ def test_update_project_handler_no_op_request():
     ),
     (
             create_event(
-                headers={'cognito:username': 'manager'},
+                request_context=create_cognito_authorizer_request_context('manager'),
                 path={'projectId': 'this does not exist'}
             ),
             HttpStatusCodes.NOT_FOUND_STATUS,
@@ -193,7 +194,7 @@ def test_update_project_handler_no_op_request():
     ),
     (
             create_event(
-                headers={'cognito:username': api_project_to_delete.manager},
+                request_context=create_cognito_authorizer_request_context(api_project_to_delete.manager),
                 path={'projectId': api_project_to_delete.id}
             ),
             HttpStatusCodes.OK_STATUS,
