@@ -30,8 +30,8 @@ const ProjectList = () => {
 			<h1>Projects List</h1>
 			<hr />
 			<ul>
-				{projects.map((project) => (
-					<li>
+				{projects.map((project, i) => (
+					<li key={i}>
 						<pre>{JSON.stringify(project, null, 4)}</pre>
 					</li>
 				))}

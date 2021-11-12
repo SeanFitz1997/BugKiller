@@ -10,6 +10,8 @@ import {
 	resolveProjectBug,
 } from "./store/entities/project/asyncActions";
 import ProjectList from "./components/ProjectList";
+import UserProvider from "./providers/UserProvider";
+import Auth from "./components/Auth";
 
 export default function App() {
 	useEffect(() => {
@@ -60,10 +62,13 @@ export default function App() {
 
 	return (
 		<Provider store={store}>
-			<div className="App">
-				<h1>Redux Demo</h1>
-				<ProjectList />
-			</div>
+			<UserProvider>
+				<div className="App">
+					<h1>Redux Demo</h1>
+					<Auth />
+					<ProjectList />
+				</div>
+			</UserProvider>
 		</Provider>
 	);
 }
