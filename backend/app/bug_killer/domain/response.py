@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Dict, Optional, Any, Callable
 
@@ -8,7 +9,6 @@ from bug_killer.domain.exceptions import (
     NotFoundException
 )
 
-import json
 
 class HttpStatusCodes:
     OK_STATUS = 200
@@ -20,6 +20,10 @@ class HttpStatusCodes:
 
 
 class Response:
+    _DEFAULT_HEADERS = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": True
+    }
 
     def __init__(
             self,
@@ -40,7 +44,9 @@ class Response:
 
     def to_api_dict(self) -> str:
         data = self.to_dict()
+        data['headers'] = {**data['headers'], **Response._DEFAULT_HEADERS}
         data['body'] = json.dumps(data['body'])
+
         return data
 
     def __repr__(self) -> str:
