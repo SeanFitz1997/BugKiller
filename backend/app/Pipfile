@@ -10,6 +10,8 @@ coverage = "*"
 [packages]
 pynamodb = "*"
 arrow = "*"
+requests = "*"
+dataclass-wizard = "*"
 
 [requires]
 python_version = "3.8"
