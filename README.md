@@ -1,5 +1,10 @@
 # BugKiller
 
+This is a project managment application built on AWS. It is WIP, more details will be added in the future.
+
+(Ignore the rest of the readme)
+
+
 UI:
 
 User logs in:
