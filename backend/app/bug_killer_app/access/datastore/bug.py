@@ -25,7 +25,7 @@ async def get_bug_item_by_id(bug_id: str) -> ProjectItem:
 
 async def create_bug_item(payload: CreateProjectPayload) -> ProjectItem:
     bug_id = str(uuid.uuid4())
-    now = arrow.utcnow()
+    now = arrow.utcnow().floor('second')
 
     bug_item = ProjectItem(
         project_id=payload.project_id,

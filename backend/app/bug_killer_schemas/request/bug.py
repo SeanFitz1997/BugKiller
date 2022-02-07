@@ -1,27 +1,31 @@
-from dataclasses import dataclass
 from typing import Optional, List
 
+from pydantic import validator
+
 from bug_killer_utils.collections import remove_duplicates_in_list
-from bug_killer_utils.models import DefaultDictCasting
+from bug_killer_utils.model.bk_base_model import BkBaseModel
 
 
-@dataclass
-class CreateBugPayload(DefaultDictCasting):
+class CreateBugPayload(BkBaseModel):
     project_id: str
     title: str
     description: str
     tags: Optional[List[str]] = None
 
-    def __post_init__(self):
-        self.tags = sorted(remove_duplicates_in_list(self.tags or []))
+    @validator('tags')
+    def set_values(cls, value: Optional[List[str]]) -> Optional[List[str]]:
+        if value is None:
+            return None
+        return sorted(remove_duplicates_in_list(value))
 
 
-@dataclass
-class UpdateBugPayload(DefaultDictCasting):
+class UpdateBugPayload(BkBaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
 
-    def __post_init__(self):
-        if self.tags:
-            self.tags = sorted(remove_duplicates_in_list(self.tags or []))
+    @validator('tags')
+    def set_values(cls, value: Optional[List[str]]) -> Optional[List[str]]:
+        if value is None:
+            return None
+        return sorted(remove_duplicates_in_list(value))

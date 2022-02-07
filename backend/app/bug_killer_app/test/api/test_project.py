@@ -56,7 +56,7 @@ class TestGetUserProjects(TestCase):
         rsp = get_user_projects_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.OK_STATUS, UserProjectsResponse().to_dict())
+        assert_response(rsp, HttpStatusCodes.OK_STATUS, UserProjectsResponse().api_dict())
 
     def test_user_with_projects(self):
         # Given
@@ -72,7 +72,7 @@ class TestGetUserProjects(TestCase):
             UserProjectsResponse(
                 manager_projects=[self.manager_project],
                 member_projects=[self.member_project]
-            ).to_dict()
+            ).api_dict()
         )
 
 
@@ -158,7 +158,7 @@ class TestGetProject(TestCase):
         rsp = get_project_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.OK_STATUS, ProjectResponse(self.get_project).to_dict())
+        assert_response(rsp, HttpStatusCodes.OK_STATUS, ProjectResponse(project=self.get_project).api_dict())
 
 
 class TestCreateProject(TestCase):
@@ -194,7 +194,7 @@ class TestCreateProject(TestCase):
         payload = create_test_create_project_payload()
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(user),
-            body=payload.to_dict()
+            body=payload.api_dict()
         )
 
         # When
@@ -204,7 +204,7 @@ class TestCreateProject(TestCase):
         assert_response(rsp, HttpStatusCodes.CREATED_STATUS)
         project = json.loads(rsp['body'])['project']
         assert_dict_attributes_not_none(project, ['id', 'createdOn', 'lastUpdatedOn'])
-        assert_dict_attributes_equals(project, {**payload.to_dict(), 'manager': user, 'bugs': []})
+        assert_dict_attributes_equals(project, {**payload.api_dict(), 'manager': user, 'bugs': []})
 
 
 class TestUpdateProject(TestCase):
@@ -234,7 +234,7 @@ class TestUpdateProject(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(user),
             path={'projectId': self.update_project.id},
-            body=UpdateProjectPayload(manager='new_manager').to_dict()
+            body=UpdateProjectPayload(manager='new_manager').api_dict()
         )
 
         # When
@@ -253,7 +253,7 @@ class TestUpdateProject(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context('invalid user'),
             path={'projectId': project_id},
-            body=UpdateProjectPayload(manager='new_manager').to_dict()
+            body=UpdateProjectPayload(manager='new_manager').api_dict()
         )
 
         # When
@@ -271,7 +271,7 @@ class TestUpdateProject(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(self.USER1),
             path={'projectId': self.update_project.id},
-            body=UpdateProjectPayload().to_dict()
+            body=UpdateProjectPayload().api_dict()
         )
 
         # When
@@ -289,7 +289,7 @@ class TestUpdateProject(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(self.USER1),
             path={'projectId': self.update_project.id},
-            body=payload.to_dict()
+            body=payload.api_dict()
         )
 
         # When
@@ -313,7 +313,7 @@ class TestUpdateProject(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(self.update_project.manager),
             path={'projectId': self.update_project.id},
-            body=payload.to_dict()
+            body=payload.api_dict()
         )
 
         # When
@@ -324,7 +324,7 @@ class TestUpdateProject(TestCase):
         project = json.loads(rsp['body'])['project']
 
         assert_dict_attributes_not_none(project, ['id', 'createdOn'])
-        assert_dict_attributes_equals(project, remove_none_values_from_dict(payload.to_dict()))
+        assert_dict_attributes_equals(project, remove_none_values_from_dict(payload.api_dict()))
         assert arrow.get(project['lastUpdatedOn']) >= self.update_project.last_updated_on.floor('second')
 
 
@@ -399,4 +399,4 @@ class TestDeleteProject(TestCase):
         rsp = delete_project_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.OK_STATUS, ProjectResponse(self.delete_project).to_dict())
+        assert_response(rsp, HttpStatusCodes.OK_STATUS, ProjectResponse(project=self.delete_project).api_dict())

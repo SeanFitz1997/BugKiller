@@ -8,10 +8,15 @@ def test_create_project():
         'members': ['M1', 'M2'],
         'tags': ['T1', 'T2']
     }
-    payload = CreateProjectPayload('test title', 'test desc', ['M2', 'M2', 'M1'], ['T2', 'T2', 'T1'])
+    payload = CreateProjectPayload(
+        title='test title',
+        description='test desc',
+        members=['M2', 'M2', 'M1'],
+        tags=['T2', 'T2', 'T1']
+    )
 
-    assert payload.to_dict() == expected_data_dict
-    assert CreateProjectPayload.from_dict(expected_data_dict) == payload
+    assert payload.api_dict() == expected_data_dict
+    assert CreateProjectPayload.parse_raw(payload.json()) == payload
 
 
 def test_update_project():
@@ -24,5 +29,5 @@ def test_update_project():
     }
     payload = UpdateProjectPayload(members=['M2', 'M2', 'M1'])
 
-    assert payload.to_dict() == expected_data_dict
-    assert UpdateProjectPayload.from_dict(expected_data_dict) == payload
+    assert payload.api_dict() == expected_data_dict
+    assert UpdateProjectPayload.parse_raw(payload.json()) == payload

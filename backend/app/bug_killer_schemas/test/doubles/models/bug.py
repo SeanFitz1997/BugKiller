@@ -17,12 +17,13 @@ def create_test_bug(
         last_updated_on: Optional[Arrow] = None,
         resolved: Optional[BugResolution] = None,
 ) -> Bug:
+    dt = arrow.utcnow().floor('second')
     return Bug(
         id=bug_id or str(uuid.uuid4()),
         title=title or mock_bug_title,
         description=description or mock_bug_description,
         tags=tags or mock_bug_tags,
-        created_on=created_on or arrow.utcnow(),
-        last_updated_on=last_updated_on or arrow.utcnow(),
+        created_on=created_on or dt,
+        last_updated_on=last_updated_on or dt,
         resolved=resolved,
     )

@@ -46,5 +46,5 @@ def execute_operation(
     rsp = asyncio.run(operation(**operation_args))
 
     # Print the response with colour
-    rsp_json = json.dumps(rsp.to_dict(), indent=4)
+    rsp_json = json.dumps(rsp.api_dict(), indent=4)
     print(rsp_json)

@@ -9,7 +9,7 @@ async def get_user_projects(auth: str) -> UserProjectsResponse:
     auth: The cognito user's id token
     """
     raw_rsp = await project_client.get_user_projects(auth)
-    return UserProjectsResponse.from_dict(raw_rsp)
+    return UserProjectsResponse.parse_obj(raw_rsp)
 
 
 async def get_project(auth: str, project_id: str) -> ProjectResponse:
@@ -19,7 +19,7 @@ async def get_project(auth: str, project_id: str) -> ProjectResponse:
     project_id: The id of the project to get
     """
     raw_rsp = await project_client.get_project(auth, project_id)
-    return ProjectResponse.from_dict(raw_rsp)
+    return ProjectResponse.parse_obj(raw_rsp)
 
 
 async def create_project(auth: str, payload: CreateProjectPayload) -> ProjectResponse:
@@ -28,8 +28,8 @@ async def create_project(auth: str, payload: CreateProjectPayload) -> ProjectRes
     auth: The cognito user's id token
     payload: The details of the project to create
     """
-    raw_rsp = await project_client.create_project(auth, payload.to_dict())
-    return ProjectResponse.from_dict(raw_rsp)
+    raw_rsp = await project_client.create_project(auth, payload.api_dict())
+    return ProjectResponse.parse_obj(raw_rsp)
 
 
 async def update_project(auth: str, project_id: str, payload: UpdateProjectPayload) -> ProjectResponse:
@@ -39,8 +39,8 @@ async def update_project(auth: str, project_id: str, payload: UpdateProjectPaylo
     project_id: The id of the project to update
     payload: The details of the project to update
     """
-    raw_rsp = await project_client.update_project(auth, project_id, payload.to_dict())
-    return ProjectResponse.from_dict(raw_rsp)
+    raw_rsp = await project_client.update_project(auth, project_id, payload.api_dict())
+    return ProjectResponse.parse_obj(raw_rsp)
 
 
 async def delete_project(auth: str, project_id: str) -> ProjectResponse:
@@ -50,4 +50,4 @@ async def delete_project(auth: str, project_id: str) -> ProjectResponse:
     project_id: The id of the project to delete
     """
     raw_rsp = await project_client.delete_project(auth, project_id)
-    return ProjectResponse.from_dict(raw_rsp)
+    return ProjectResponse.parse_obj(raw_rsp)

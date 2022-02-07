@@ -26,30 +26,29 @@ def handle_exception_responses(handler: Callable) -> Callable:
                 AlreadyResolvedBugException
         ) as e:
             logging.exception('Known 400 exception')
-            return BadRequestResponse(body=message_body(e.message)).to_api_dict()
+            return BadRequestResponse(body=message_body(e.message)).api_dict()
 
         # 401 Unauthorized Errors
         except MissingAuthHeaderException as e:
             logging.exception('Known 401 exception')
-            return UnAuthorizedResponse(body=message_body(e.message)).to_api_dict()
-
+            return UnAuthorizedResponse(body=message_body(e.message)).api_dict()
         # 403 Forbidden Errors
         except UnauthorizedProjectAccessException as e:
             logging.exception('Known 403 exception')
-            return ForbiddenResponse(body=message_body(e.message)).to_api_dict()
+            return ForbiddenResponse(body=message_body(e.message)).api_dict()
 
         # 404 Errors
         except NotFoundException as e:
             logging.exception('Known 404 exception')
-            return NotFoundResponse(body=message_body(e.message)).to_api_dict()
+            return NotFoundResponse(body=message_body(e.message)).api_dict()
 
         # 500 Errors
         except (ManagerNotFoundException, MultipleMatchException) as e:
             logging.exception('Known 500 exception')
-            return InternalServerErrorResponse(body=message_body(e.message)).to_api_dict()
+            return InternalServerErrorResponse(body=message_body(e.message)).api_dict()
         except Exception:
             logging.exception('Unknown 500 exception. Returning Internal server error response')
-            return InternalServerErrorResponse(body=message_body('Internal server error')).to_api_dict()
+            return InternalServerErrorResponse(body=message_body('Internal server error')).api_dict()
 
     return wrapper
 

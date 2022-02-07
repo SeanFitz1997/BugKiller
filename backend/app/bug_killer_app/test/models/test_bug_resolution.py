@@ -8,7 +8,7 @@ from bug_killer_app.test.test_doubles.entities import create_test_bug_resolution
 
 def test_bug_resolution_from_db_attribute():
     # Given
-    dt = arrow.now()
+    dt = arrow.utcnow()
     resolution_attr = create_test_bug_resolution_attribute()
 
     # When
@@ -23,7 +23,7 @@ def test_bug_resolution_from_db_attribute():
 
 def test_bug_resolution_to_db_attribute():
     # Given
-    dt = arrow.now()
+    dt = arrow.utcnow()
     resolution = create_test_bug_resolution()
 
     # When

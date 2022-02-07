@@ -16,10 +16,10 @@ def test_bug_response():
 
     expected_rsp_dict = {
         'projectId': '123',
-        'bug': bug.to_dict()
+        'bug': bug.api_dict()
     }
 
-    rsp = BugResponse('123', bug)
+    rsp = BugResponse(project_id='123', bug=bug)
 
-    assert rsp.to_dict() == expected_rsp_dict
-    assert BugResponse.from_dict(expected_rsp_dict) == rsp
+    assert rsp.api_dict() == expected_rsp_dict
+    assert BugResponse.parse_raw(rsp.json()) == rsp

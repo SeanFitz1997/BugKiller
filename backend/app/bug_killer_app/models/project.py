@@ -10,7 +10,6 @@ from bug_killer_utils.strings import remove_prefix
 
 
 class BkAppProject(Project):
-    _BUG_CLS = BkAppBug
 
     @classmethod
     def from_db_items(
@@ -21,14 +20,14 @@ class BkAppProject(Project):
             bug_items: Optional[List[ProjectItem]] = None,
     ) -> 'BkAppProject':
         manager = remove_prefix(ProjectAssociationPrefix.MANAGER.value, manager_item.project_association)
-        tags = list(project_item.tags) if project_item.tags else None
+        tags = list(project_item.tags) if project_item.tags else []
 
         members = [
             remove_prefix(ProjectAssociationPrefix.MEMBER.value, member.project_association)
             for member in member_items
-        ] if member_items else None
+        ] if member_items else []
 
-        bugs = [BkAppBug.from_db_item(bug) for bug in bug_items] if bug_items else None
+        bugs = [BkAppBug.from_db_item(bug) for bug in bug_items] if bug_items else []
 
         return cls(
             id=project_item.project_id,

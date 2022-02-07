@@ -1,8 +1,9 @@
 from enum import Enum
 from typing import Any, Dict
 
+from pydantic import ValidationError
+
 from bug_killer_app.domain.exceptions import MissingAuthHeaderException, MissingRequiredRequestParamException
-from bug_killer_utils.models import MissingFromDictArgs
 from bug_killer_utils.strings import snake_case_to_camel_case
 
 
@@ -58,12 +59,10 @@ def get_event_body(evt: Dict[str, Any]) -> Dict[str, Any]:
 
 def parse_dto(evt_body: Dict[str, Any], dto_class: type) -> object:
     try:
-        return dto_class.from_dict(evt_body)
-    except MissingFromDictArgs as e:
-        raise MissingRequiredRequestParamException(
-            ParameterType.BODY.value,
-            snake_case_to_camel_case(e.missing_args[0])
-        )
+        return dto_class.parse_obj(evt_body)
+    except ValidationError as e:
+        missing_param = e.errors()[0]['loc'][0]
+        raise MissingRequiredRequestParamException(ParameterType.BODY.value, snake_case_to_camel_case(missing_param))
 
 
 def get_auth_user(evt: Dict[str, Any]) -> str:

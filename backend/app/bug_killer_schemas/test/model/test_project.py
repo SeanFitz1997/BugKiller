@@ -5,7 +5,7 @@ from bug_killer_schemas.models.project import Project
 
 
 def test_project():
-    resolution = BugResolution('user_123', arrow.get('2022-01-01'))
+    resolution = BugResolution(resolver_id='user_123', resolved_on=arrow.get('2022-01-01'))
     bug = Bug(
         id='123',
         title='test title',
@@ -25,7 +25,7 @@ def test_project():
         'lastUpdatedOn': '2022-01-01T00:00:00Z',
         'tags': ['T1', 'T2'],
         'members': ['M1', 'M2'],
-        'bugs': [bug.to_dict()]
+        'bugs': [bug.api_dict()]
     }
 
     project = Project(
@@ -40,5 +40,5 @@ def test_project():
         bugs=[bug]
     )
 
-    assert project.to_dict() == expected_project_dict
-    assert Project.from_dict(expected_project_dict) == project
+    assert project.api_dict() == expected_project_dict
+    assert Project.parse_raw(project.json()) == project

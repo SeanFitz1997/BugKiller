@@ -16,8 +16,8 @@ async def get_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
     project_id, bug = await get_bug(user_id, bug_id)
 
-    rsp = BugResponse(project_id, bug)
-    return OkResponse(body=rsp.to_dict()).to_api_dict()
+    rsp = BugResponse(project_id=project_id, bug=bug)
+    return OkResponse(body=rsp.api_dict()).api_dict()
 
 
 @lambda_api_handler
@@ -27,8 +27,8 @@ async def create_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
     bug = await create_project_bug(user_id, payload)
 
-    rsp = BugResponse(payload.project_id, bug)
-    return CreatedResponse(body=rsp.to_dict()).to_api_dict()
+    rsp = BugResponse(project_id=payload.project_id, bug=bug)
+    return CreatedResponse(body=rsp.api_dict()).api_dict()
 
 
 @lambda_api_handler
@@ -39,8 +39,8 @@ async def update_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
     project_id, bug = await update_project_bug(user_id, bug_id, payload)
 
-    rsp = BugResponse(project_id, bug)
-    return UpdatedResponse(body=rsp.to_dict()).to_api_dict()
+    rsp = BugResponse(project_id=project_id, bug=bug)
+    return UpdatedResponse(body=rsp.api_dict()).api_dict()
 
 
 @lambda_api_handler
@@ -50,8 +50,8 @@ async def resolve_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
     project_id, bug = await resolve_project_bug(user_id, bug_id)
 
-    rsp = BugResponse(project_id, bug)
-    return UpdatedResponse(body=rsp.to_dict()).to_api_dict()
+    rsp = BugResponse(project_id=project_id, bug=bug)
+    return UpdatedResponse(body=rsp.api_dict()).api_dict()
 
 
 @lambda_api_handler
@@ -61,5 +61,5 @@ async def delete_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
     project_id, bug = await delete_project_bug(user_id, bug_id)
 
-    rsp = BugResponse(project_id, bug)
-    return DeletedResponse(body=rsp.to_dict()).to_api_dict()
+    rsp = BugResponse(project_id=project_id, bug=bug)
+    return DeletedResponse(body=rsp.api_dict()).api_dict()

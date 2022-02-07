@@ -1,10 +1,10 @@
 from typing import NoReturn
 
-from bug_killer_app.util.entity import get_local_function_in_module
 from bug_killer_client.cli.builder import generate_cli
+from bug_killer_client.cli.builder import get_cli_defaults
 from bug_killer_client.cli.executor import execute_operation
-from bug_killer_client.cli.util import get_cli_defaults
 from bug_killer_client.service import project, bug
+from bug_killer_utils.object import get_local_function_in_module
 
 
 def main() -> NoReturn:

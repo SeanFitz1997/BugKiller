@@ -1,12 +1,17 @@
-def get_object_public_attributes(obj: object) -> List[Any]:
+from collections import Callable
+from types import ModuleType
+from typing import List, Any
+
+
+def get_object_public_attributes(obj: Any) -> List[Any]:
     return [v for k, v in vars(obj).items() if not k.startswith('_')]
 
 
-def get_object_public_values(obj: object) -> List[Any]:
+def get_object_public_values(obj: Any) -> List[Any]:
     return [attr for attr in get_object_public_attributes(obj) if not callable(attr)]
 
 
-def get_object_public_methods(obj: object) -> List[Callable]:
+def get_object_public_methods(obj: Any) -> List[Callable]:
     return [attr for attr in get_object_public_attributes(obj) if callable(attr)]
 
 

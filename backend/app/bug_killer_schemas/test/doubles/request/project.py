@@ -12,8 +12,8 @@ def create_test_create_project_payload(
         tags: Optional[List[str]] = None
 ) -> CreateProjectPayload:
     return CreateProjectPayload(
-        title or mock_project_title,
-        description or mock_project_description,
-        members or [mock_team_member_id],
-        tags or mock_project_tags
+        title=title or mock_project_title,
+        description=description or mock_project_description,
+        members=members or [mock_team_member_id],
+        tags=tags or mock_project_tags
     )

@@ -23,14 +23,14 @@ def test_user_project_response():
     )
 
     expected_response_dict = {
-        'managerProjects': [manager_project.to_dict()],
-        'memberProjects': [member_project.to_dict()]
+        'managerProjects': [manager_project.api_dict()],
+        'memberProjects': [member_project.api_dict()]
     }
 
-    rsp = UserProjectsResponse([manager_project], [member_project])
+    rsp = UserProjectsResponse(manager_projects=[manager_project], member_projects=[member_project])
 
-    assert rsp.to_dict() == expected_response_dict
-    assert UserProjectsResponse.from_dict(expected_response_dict) == rsp
+    assert rsp.api_dict() == expected_response_dict
+    assert UserProjectsResponse.parse_raw(rsp.json()) == rsp
 
 
 def test_project_response():
@@ -43,9 +43,9 @@ def test_project_response():
         last_updated_on=arrow.get('2022-01-01')
     )
 
-    expected_rsp_dict = {'project': project.to_dict()}
+    expected_rsp_dict = {'project': project.api_dict()}
 
-    rsp = ProjectResponse(project)
+    rsp = ProjectResponse(project=project)
 
-    assert rsp.to_dict() == expected_rsp_dict
-    assert ProjectResponse.from_dict(expected_rsp_dict) == rsp
+    assert rsp.api_dict() == expected_rsp_dict
+    assert ProjectResponse.parse_raw(rsp.json()) == rsp

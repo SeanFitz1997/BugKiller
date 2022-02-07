@@ -1,9 +1,10 @@
 import json
-from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Optional, Any
+from typing import Dict, Any
 
-from bug_killer_utils.models import DefaultDictCasting
+from pydantic import Field
+
+from bug_killer_utils.model.bk_base_model import BkBaseModel
 
 
 class HttpStatusCodes(int, Enum):
@@ -16,28 +17,18 @@ class HttpStatusCodes(int, Enum):
     INTERNAL_SERVER_ERROR_STATUS = 500
 
 
-@dataclass
-class HttpResponse(DefaultDictCasting):
+class HttpResponse(BkBaseModel):
     status_code: HttpStatusCodes
-    headers: Optional[Dict[str, Any]] = None
-    body: Optional[Dict[str, Any]] = None
-
-    def __post_init__(self):
-        self.headers = self.headers or {}
-        self.body = self.body or {}
+    headers: Dict[str, Any] = Field(default_factory=dict)
+    body: Dict[str, Any] = Field(default_factory=dict)
 
     _DEFAULT_HEADERS = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": True
     }
 
-    def to_dict(self) -> Dict[str, Any]:
-        data = super().to_dict()
-        data['status'] = self.status_code.value
-        return data
-
-    def to_api_dict(self) -> Dict[str, Any]:
-        data = self.to_dict()
+    def api_dict(self) -> Dict[str, Any]:
+        data = super().api_dict()
         data['headers'] = {**data['headers'], **HttpResponse._DEFAULT_HEADERS}
         data['body'] = json.dumps(data['body'])
 
@@ -45,57 +36,39 @@ class HttpResponse(DefaultDictCasting):
 
 
 class OkResponse(HttpResponse):
-
-    def __init__(self, headers: Optional[Dict[str, Any]] = None, body: Optional[Dict[str, Any]] = None):
-        super().__init__(HttpStatusCodes.OK_STATUS, headers, body)
+    status_code = Field(HttpStatusCodes.OK_STATUS, const=True)
 
 
 class UpdatedResponse(HttpResponse):
-
-    def __init__(self, headers: Optional[Dict[str, Any]] = None, body: Optional[Dict[str, Any]] = None):
-        super().__init__(HttpStatusCodes.OK_STATUS, headers, body)
+    status_code = Field(HttpStatusCodes.OK_STATUS, const=True)
 
 
 class CreatedResponse(HttpResponse):
-
-    def __init__(self, headers: Optional[Dict[str, Any]] = None, body: Optional[Dict[str, Any]] = None):
-        super().__init__(HttpStatusCodes.CREATED_STATUS, headers, body)
+    status_code = Field(HttpStatusCodes.CREATED_STATUS, const=True)
 
 
 class DeletedResponse(HttpResponse):
-
-    def __init__(self, headers: Optional[Dict[str, Any]] = None, body: Optional[Dict[str, Any]] = None):
-        super().__init__(HttpStatusCodes.OK_STATUS, headers, body)
+    status_code = Field(HttpStatusCodes.OK_STATUS, const=True)
 
 
 class BadRequestResponse(HttpResponse):
-
-    def __init__(self, headers: Optional[Dict[str, Any]] = None, body: Optional[Dict[str, Any]] = None):
-        super().__init__(HttpStatusCodes.BAD_REQUEST_STATUS, headers, body)
+    status_code = Field(HttpStatusCodes.BAD_REQUEST_STATUS, const=True)
 
 
 class UnAuthorizedResponse(HttpResponse):
-
-    def __init__(self, headers: Optional[Dict[str, Any]] = None, body: Optional[Dict[str, Any]] = None):
-        super().__init__(HttpStatusCodes.UNAUTHORIZED_STATUS, headers, body)
+    status_code = Field(HttpStatusCodes.UNAUTHORIZED_STATUS, const=True)
 
 
 class ForbiddenResponse(HttpResponse):
-
-    def __init__(self, headers: Optional[Dict[str, Any]] = None, body: Optional[Dict[str, Any]] = None):
-        super().__init__(HttpStatusCodes.FORBIDDEN_STATUS, headers, body)
+    status_code = Field(HttpStatusCodes.FORBIDDEN_STATUS, const=True)
 
 
 class NotFoundResponse(HttpResponse):
-
-    def __init__(self, headers: Optional[Dict[str, Any]] = None, body: Optional[Dict[str, Any]] = None):
-        super().__init__(HttpStatusCodes.NOT_FOUND_STATUS, headers, body)
+    status_code = Field(HttpStatusCodes.NOT_FOUND_STATUS, const=True)
 
 
 class InternalServerErrorResponse(HttpResponse):
-
-    def __init__(self, headers: Optional[Dict[str, Any]] = None, body: Optional[Dict[str, Any]] = None):
-        super().__init__(HttpStatusCodes.INTERNAL_SERVER_ERROR_STATUS, headers, body)
+    status_code = Field(HttpStatusCodes.INTERNAL_SERVER_ERROR_STATUS, const=True)
 
 
 def message_body(message: str) -> Dict[str, Any]:

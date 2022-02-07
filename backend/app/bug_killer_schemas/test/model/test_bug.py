@@ -8,14 +8,14 @@ def test_bug_resolution():
         'resolverId': '123',
         'resolvedOn': '2022-01-01T00:00:00Z',
     }
-    resolution = BugResolution('123', arrow.get('2022-01-01'))
+    resolution = BugResolution(resolver_id='123', resolved_on=arrow.get('2022-01-01'))
 
-    assert resolution.to_dict() == expected_data_dict
-    assert BugResolution.from_dict(expected_data_dict) == resolution
+    assert resolution.api_dict() == expected_data_dict
+    assert BugResolution.parse_raw(resolution.json()) == resolution
 
 
 def test_bug():
-    resolution = BugResolution('user_123', arrow.get('2022-01-01'))
+    resolution = BugResolution(resolver_id='user_123', resolved_on=arrow.get('2022-01-01'))
 
     expected_data_dict = {
         'id': '123',
@@ -24,7 +24,7 @@ def test_bug():
         'createdOn': '2022-01-01T00:00:00Z',
         'lastUpdatedOn': '2022-01-01T00:00:00Z',
         'tags': ['T1', 'T2'],
-        'resolved': resolution.to_dict()
+        'resolved': resolution.api_dict()
     }
     bug = Bug(
         id='123',
@@ -36,5 +36,5 @@ def test_bug():
         resolved=resolution
     )
 
-    assert bug.to_dict() == expected_data_dict
-    assert Bug.from_dict(expected_data_dict) == bug
+    assert bug.api_dict() == expected_data_dict
+    assert Bug.parse_raw(bug.json()) == bug

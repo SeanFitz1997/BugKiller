@@ -38,7 +38,7 @@ async def create_project_bug(user_id: str, payload: CreateBugPayload) -> BkAppBu
 async def update_project_bug(user_id: str, bug_id: str, payload: UpdateProjectPayload) -> Tuple[str, BkAppBug]:
     logging.info(f'Updating bug {bug_id} with {payload = }')
 
-    if is_dict_empty(payload.to_dict()):
+    if is_dict_empty(payload.api_dict()):
         raise EmptyUpdateException()
 
     project_id, bug = await get_bug(user_id, bug_id)
@@ -51,7 +51,7 @@ async def resolve_project_bug(user_id: str, bug_id: str) -> Tuple[str, BkAppBug]
     logging.info(f'User {user_id} resolving Bug {bug_id}')
     resolution = BkAppBugResolution(
         resolver_id=user_id,
-        resolved_on=arrow.utcnow()
+        resolved_on=arrow.utcnow().floor('second')
     )
 
     project_id, bug = await get_bug(user_id, bug_id)

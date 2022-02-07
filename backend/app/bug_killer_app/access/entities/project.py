@@ -56,7 +56,7 @@ async def create_project(manager_id: str, payload: CreateProjectPayload) -> BkAp
 async def update_project(user_id: str, project_id: str, payload: UpdateProjectPayload) -> BkAppProject:
     logging.info(f"Updating project with {user_id = } {project_id = } {payload = }")
 
-    if is_dict_empty(payload.to_dict()):
+    if is_dict_empty(payload.api_dict()):
         raise EmptyUpdateException()
 
     project = await get_project(project_id)

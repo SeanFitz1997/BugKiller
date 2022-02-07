@@ -12,6 +12,7 @@ pynamodb = "*"
 arrow = "*"
 requests = "*"
 dataclass-wizard = "*"
+pydantic = "*"
 
 [requires]
 python_version = "3.8"

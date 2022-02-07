@@ -23,7 +23,7 @@ def create_test_project(
         members: Optional[List[str]] = None,
         bugs: Optional[List[Bug]] = None,
 ) -> BkAppProject:
-    now = arrow.utcnow()
+    now = arrow.utcnow().floor('second')
     return BkAppProject(
         id=project_id or str(uuid.uuid4()),
         title=title or mock_project_title,
@@ -46,7 +46,7 @@ def create_test_bug(
         last_updated_on: Optional[Arrow] = None,
         resolved: Optional[BkAppBugResolution] = None,
 ) -> BkAppBug:
-    now = arrow.utcnow()
+    now = arrow.utcnow().floor('second')
     return BkAppBug(
         id=bug_id or str(uuid.uuid4()),
         title=title or mock_bug_title,
@@ -62,4 +62,5 @@ def create_test_bug_resolution(
         resolver_id: Optional[str] = None,
         resolved_on: Optional[Arrow] = None
 ) -> BkAppBugResolution:
-    return BkAppBugResolution(resolver_id=resolver_id or mock_user_id, resolved_on=resolved_on or arrow.utcnow())
+    dt = arrow.utcnow().floor('second')
+    return BkAppBugResolution(resolver_id=resolver_id or mock_user_id, resolved_on=resolved_on or dt)

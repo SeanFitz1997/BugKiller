@@ -79,7 +79,7 @@ async def create_project_items(
         payload: CreateProjectPayload
 ) -> Tuple[ProjectItem, ProjectItem, List[ProjectItem]]:
     project_id = str(uuid.uuid4())
-    now = arrow.utcnow()
+    now = arrow.utcnow().floor('second')
 
     project_item = ProjectItem(
         project_id=project_id,

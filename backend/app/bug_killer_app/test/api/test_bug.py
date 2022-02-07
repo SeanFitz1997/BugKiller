@@ -108,7 +108,7 @@ class TestGetBug(TestCase):
         assert_response(
             rsp,
             HttpStatusCodes.OK_STATUS,
-            BugResponse(project_id=self.project_with_bug.id, bug=self.bug_to_get).to_dict()
+            BugResponse(project_id=self.project_with_bug.id, bug=self.bug_to_get).api_dict()
         )
 
 
@@ -154,7 +154,7 @@ class TestCreateBug(TestCase):
         user = 'lacks_access'
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(user),
-            body=create_test_create_bug_payload(self.project.id).to_dict()
+            body=create_test_create_bug_payload(self.project.id).api_dict()
         )
 
         # When
@@ -172,7 +172,7 @@ class TestCreateBug(TestCase):
         project_id = 'does_not_exist'
         evt = create_event(
             request_context=create_cognito_authorizer_request_context('user'),
-            body=create_test_create_bug_payload(project_id).to_dict()
+            body=create_test_create_bug_payload(project_id).api_dict()
         )
 
         # When
@@ -190,7 +190,7 @@ class TestCreateBug(TestCase):
         payload = create_test_create_bug_payload(self.project.id)
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(self.USER1),
-            body=payload.to_dict()
+            body=payload.api_dict()
         )
 
         # When
@@ -254,7 +254,7 @@ class TestUpdateBug(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(self.USER1),
             path={'bugId': self.bug_to_update.id},
-            body=UpdateBugPayload().to_dict()
+            body=UpdateBugPayload().api_dict()
         )
 
         # When
@@ -273,7 +273,7 @@ class TestUpdateBug(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context('user'),
             path={'bugId': bug_id},
-            body=UpdateBugPayload(title='title update').to_dict()
+            body=UpdateBugPayload(title='title update').api_dict()
         )
 
         # When
@@ -291,7 +291,7 @@ class TestUpdateBug(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(self.USER1),
             path={'bugId': self.change_update_bug.id},
-            body=UpdateBugPayload(title=self.change_update_bug.title).to_dict()
+            body=UpdateBugPayload(title=self.change_update_bug.title).api_dict()
         )
 
         # When
@@ -310,7 +310,7 @@ class TestUpdateBug(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(user),
             path={'bugId': self.bug_to_update.id},
-            body=UpdateBugPayload(title='some_edit').to_dict()
+            body=UpdateBugPayload(title='some_edit').api_dict()
         )
 
         # When
@@ -330,7 +330,7 @@ class TestUpdateBug(TestCase):
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(self.USER1),
             path={'bugId': self.bug_to_update.id},
-            body=UpdateBugPayload(title=new_title).to_dict()
+            body=UpdateBugPayload(title=new_title).api_dict()
         )
 
         # When
@@ -467,7 +467,7 @@ class TestResolveBug(TestCase):
 
         # Then
         assert_response(rsp, HttpStatusCodes.OK_STATUS)
-        bug_resolution = BugResolution.from_dict(json.loads(rsp['body'])['bug']['resolved'])
+        bug_resolution = BugResolution.parse_obj(json.loads(rsp['body'])['bug']['resolved'])
         assert bug_resolution.resolver_id == self.USER1
         assert bug_resolution.resolved_on is not None
 
@@ -540,5 +540,5 @@ class TestDeleteBug(TestCase):
         assert_response(
             rsp,
             HttpStatusCodes.OK_STATUS,
-            BugResponse(self.project.id, self.bug_to_delete).to_dict()
+            BugResponse(project_id=self.project.id, bug=self.bug_to_delete).api_dict()
         )

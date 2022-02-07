@@ -16,8 +16,8 @@ async def get_user_projects_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
     manager_projects, member_projects = await get_users_projects(user_id)
 
-    rsp = UserProjectsResponse(manager_projects, member_projects)
-    return OkResponse(body=rsp.to_dict()).to_api_dict()
+    rsp = UserProjectsResponse(manager_projects=manager_projects, member_projects=member_projects)
+    return OkResponse(body=rsp.api_dict()).api_dict()
 
 
 @lambda_api_handler
@@ -28,8 +28,8 @@ async def get_project_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
     project = await get_project(project_id)
     assert_user_has_project_member_access(user_id, project)
 
-    rsp = ProjectResponse(project)
-    return OkResponse(body=rsp.to_dict()).to_api_dict()
+    rsp = ProjectResponse(project=project)
+    return OkResponse(body=rsp.api_dict()).api_dict()
 
 
 @lambda_api_handler
@@ -40,7 +40,7 @@ async def create_project_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
     project = await create_project(user_id, payload)
 
     rsp = ProjectResponse(project=project)
-    return CreatedResponse(body=rsp.to_dict()).to_api_dict()
+    return CreatedResponse(body=rsp.api_dict()).api_dict()
 
 
 @lambda_api_handler
@@ -52,7 +52,7 @@ async def update_project_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
     project = await update_project(user_id, project_id, payload)
 
     rsp = ProjectResponse(project=project)
-    return UpdatedResponse(body=rsp.to_dict()).to_api_dict()
+    return UpdatedResponse(body=rsp.api_dict()).api_dict()
 
 
 @lambda_api_handler
@@ -63,4 +63,4 @@ async def delete_project_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
     project = await delete_project(user_id, project_id)
 
     rsp = ProjectResponse(project=project)
-    return DeletedResponse(body=rsp.to_dict()).to_api_dict()
+    return DeletedResponse(body=rsp.api_dict()).api_dict()
