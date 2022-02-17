@@ -11,7 +11,7 @@ def main() -> NoReturn:
     defaults = get_cli_defaults()
     operations = get_local_function_in_module(project) + get_local_function_in_module(bug)
     parser = generate_cli(operations, defaults, 'BugKiller CLI')
-    execute_operation(operations, parser.parse_args(), defaults)
+    execute_operation(operations, parser.parse_args())
 
 
 if __name__ == '__main__':

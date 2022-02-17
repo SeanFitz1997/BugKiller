@@ -5,7 +5,7 @@ import arrow
 from bug_killer_app.datastore.project_table.project_item import ProjectItem, ProjectAssociationPrefix
 from bug_killer_app.domain.types import AllProjectItems
 from bug_killer_app.models.bug import BkAppBug
-from bug_killer_schemas.models.project import Project
+from bug_killer_schemas.entities.project import Project
 from bug_killer_utils.strings import remove_prefix
 
 

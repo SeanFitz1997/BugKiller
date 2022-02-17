@@ -10,7 +10,7 @@ from bug_killer_app.domain.response import HttpStatusCodes, message_body
 from bug_killer_app.test.helpers import create_event, assert_response, assert_dict_attributes_not_none, \
     assert_dict_attributes_equals, create_cognito_authorizer_request_context
 from bug_killer_app.test.test_doubles.db.transact_write import DummyTransactWrite
-from bug_killer_schemas.models.bug import BugResolution
+from bug_killer_schemas.entities.bug import BugResolution
 from bug_killer_schemas.request.bug import UpdateBugPayload
 from bug_killer_schemas.response.bug import BugResponse
 from bug_killer_schemas.test.doubles.request.bug import create_test_create_bug_payload

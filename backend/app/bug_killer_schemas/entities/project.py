@@ -3,19 +3,20 @@ from typing import List
 from pydantic import validator, Field
 
 from bug_killer_app.util.entity import sort_by_create_date
-from bug_killer_schemas.models.bug import Bug
+from bug_killer_schemas.entities.bug import Bug
 from bug_killer_utils.collections import remove_duplicates_in_list
 from bug_killer_utils.model.bk_base_model import BkBaseModel
-from bug_killer_utils.model.fields.arrow import ArrowField
+from bug_killer_utils.model.types.arrow import ArrowType
 
 
 class Project(BkBaseModel):
+    """ A project to track a list of bugs """
     id: str
     title: str
     description: str
-    manager: str
-    created_on: ArrowField
-    last_updated_on: ArrowField
+    manager: str = Field('The cognito user id of the project manager')
+    created_on: ArrowType
+    last_updated_on: ArrowType
     tags: List[str] = Field(default_factory=list)
     members: List[str] = Field(default_factory=list)
     bugs: List[Bug] = Field(default_factory=list)

@@ -2,7 +2,7 @@ import arrow
 
 from bug_killer_app.datastore.project_table.project_item import ProjectItem, ProjectAssociationPrefix
 from bug_killer_app.models.bug_resolution import BkAppBugResolution
-from bug_killer_schemas.models.bug import Bug
+from bug_killer_schemas.entities.bug import Bug
 from bug_killer_utils.strings import remove_prefix
 
 

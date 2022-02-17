@@ -58,8 +58,9 @@ def generate_cli(
             sub_parser.add_argument(
                 f'--{snake_case_to_camel_case(param.name)}',
                 type=_get_arg_type(param.annotation),
-                required=param.name not in saved_defaults,
-                help=operation_help.arguments_help.get(param.name)
+                help=operation_help.arguments_help.get(param.name),
+                required=not snake_case_to_camel_case(param.name) in saved_defaults,
+                default=saved_defaults.get(snake_case_to_camel_case(param.name))
             )
 
     return parent_parser

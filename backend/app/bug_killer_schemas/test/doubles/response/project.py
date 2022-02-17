@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from bug_killer_schemas.models.project import Project
+from bug_killer_schemas.entities.project import Project
 from bug_killer_schemas.response.project import UserProjectsResponse, ProjectResponse
 from bug_killer_schemas.test.doubles.models.project import create_test_project
 

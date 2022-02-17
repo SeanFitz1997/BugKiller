@@ -1,6 +1,6 @@
 import arrow
 
-from bug_killer_schemas.models.project import Project
+from bug_killer_schemas.entities.project import Project
 from bug_killer_schemas.response.project import UserProjectsResponse, ProjectResponse
 
 

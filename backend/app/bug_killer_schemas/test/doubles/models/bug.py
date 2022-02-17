@@ -4,7 +4,7 @@ from typing import Optional, List
 import arrow
 from arrow import Arrow
 
-from bug_killer_schemas.models.bug import BugResolution, Bug
+from bug_killer_schemas.entities.bug import BugResolution, Bug
 from bug_killer_schemas.test.doubles.default_values import mock_bug_title, mock_bug_description, mock_bug_tags
 
 

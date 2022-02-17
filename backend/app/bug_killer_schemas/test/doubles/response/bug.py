@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 
-from bug_killer_schemas.models.bug import Bug
+from bug_killer_schemas.entities.bug import Bug
 from bug_killer_schemas.response.bug import BugResponse
 from bug_killer_schemas.test.doubles.models.bug import create_test_bug
 

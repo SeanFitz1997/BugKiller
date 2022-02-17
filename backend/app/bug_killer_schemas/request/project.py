@@ -7,10 +7,14 @@ from bug_killer_utils.model.bk_base_model import BkBaseModel
 
 
 class CreateProjectPayload(BkBaseModel):
-    title: str
-    description: str
-    members: List[str] = Field(default_factory=list)
-    tags: List[str] = Field(default_factory=list)
+    """ Payload used to create a new project """
+    title: str = Field(description='The title of the project to create')
+    description: str = Field(description='The title of the project to create')
+    members: List[str] = Field(
+        default_factory=list,
+        description='List of members to be added to the project. It should be a list of cognito user ids'
+    )
+    tags: List[str] = Field(default_factory=list, description='List of tags to be added to the project to create')
 
     @validator('members', 'tags', pre=True)
     def set_values(cls, value: List[str]) -> List[str]:
@@ -18,11 +22,12 @@ class CreateProjectPayload(BkBaseModel):
 
 
 class UpdateProjectPayload(BkBaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    manager: Optional[str] = None
-    members: Optional[List[str]] = None
-    tags: Optional[List[str]] = None
+    """ Payload used to update an existing project """
+    title: Optional[str] = Field(None, description='The new title to set')
+    description: Optional[str] = Field(None, description='The new description to set')
+    manager: Optional[str] = Field(None, description='The cognito user id of the new manager of the project')
+    members: Optional[List[str]] = Field(None, description='The new list of members that the project should have')
+    tags: Optional[List[str]] = Field(None, description='The new list of tags to set')
 
     @validator('members', 'tags')
     def set_values(cls, value: Optional[List[str]]) -> Optional[List[str]]:

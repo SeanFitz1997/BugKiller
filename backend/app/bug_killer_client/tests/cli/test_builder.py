@@ -35,7 +35,8 @@ class TestGenerateCli(TestCase):
             pass
 
         cls.test_operation = test_operation
-        cls.test_defaults = {'valueWithDefault': 1}
+        cls.default_model_value = UpdateProjectPayload()
+        cls.test_defaults = {'modelValue': cls.default_model_value.json()}
         cls.test_title = 'Test CLI'
 
     def test_generate_cli_error_when_no_operations(self):
@@ -43,7 +44,36 @@ class TestGenerateCli(TestCase):
             generate_cli([])
 
     def test_generate_cli_with_operation(self):
-        # TODO: Finish test
+        # Given
+        str_param = 'test'
+        model_param = UpdateProjectPayload(title='a test value')
+
+        # When
         parser = generate_cli([self.test_operation], self.test_defaults, self.test_title)
 
+        # Then
         assert parser.description == self.test_title
+
+        # Fails if no args given
+        with pytest.raises(SystemExit):
+            parser.parse_args([])
+
+        # Fails if command not recognised
+        with pytest.raises(SystemExit):
+            parser.parse_args(['wrong_command'])
+
+        # Fails if required params not given
+        with pytest.raises(SystemExit):
+            parser.parse_args(['testOperation'])
+
+        # Passes if all args given
+        result = parser.parse_args(['testOperation', '--strValue', str_param, '--modelValue', model_param.json()])
+        assert result.operation == 'testOperation'
+        assert result.strValue == str_param
+        assert result.modelValue == model_param
+        assert result.verbose is False
+
+        # Pass if all required args given
+        result = parser.parse_args(['testOperation', '--strValue', str_param])
+        assert result.strValue == str_param
+        assert result.modelValue == self.default_model_value

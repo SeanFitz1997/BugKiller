@@ -1,7 +1,7 @@
 import arrow
 
 from bug_killer_app.datastore.attributes.bug_resolution_map import BugResolutionMapAttribute
-from bug_killer_schemas.models.bug import BugResolution
+from bug_killer_schemas.entities.bug import BugResolution
 
 
 class BkAppBugResolution(BugResolution):

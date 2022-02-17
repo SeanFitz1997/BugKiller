@@ -9,6 +9,9 @@ from bug_killer_client.util import get_auth_headers, handle_rsp
 
 async def get_user_projects(auth: str) -> Dict[str, Any]:
     logging.info(f'Getting user projects')
+    import pdb;
+
+    pdb.set_trace()
     rsp = requests.get(ApiVariables.API_URL + '/projects', headers=get_auth_headers(auth))
     return handle_rsp(rsp)
 

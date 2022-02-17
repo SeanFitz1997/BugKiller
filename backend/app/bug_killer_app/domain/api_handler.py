@@ -1,22 +1,60 @@
 import asyncio
 import json
 import logging
-from typing import Callable, Any, Dict
+from enum import Enum
+from functools import wraps
+from typing import Callable, TypeVar, Awaitable, Optional, Type, List
+
+from pydantic import BaseModel, Field
+from typing_extensions import ParamSpec
 
 from bug_killer_app.domain.exceptions import UnauthorizedProjectAccessException, MissingAuthHeaderException, \
     MissingRequiredRequestParamException, NotFoundException, MultipleMatchException, ManagerNotFoundException, \
     EmptyUpdateException, NoChangesInUpdateException, AlreadyResolvedBugException
 from bug_killer_app.domain.response import UnAuthorizedResponse, BadRequestResponse, NotFoundResponse, \
-    InternalServerErrorResponse, message_body, ForbiddenResponse
+    InternalServerErrorResponse, message_body, ForbiddenResponse, HttpStatusCodes
 
 
-def handle_exception_responses(handler: Callable) -> Callable:
+P = ParamSpec('P')
+R = TypeVar('R')
+
+
+class HttpMethod(str, Enum):
+    GET = 'get'
+    POST = 'post'
+    PATCH = 'patch'
+    DELETE = 'delete'
+
+
+class PathArgDetails(BaseModel):
+    name: str
+    description: str
+    is_required: bool = True
+
+
+class PathDetails(BaseModel):
+    path: str
+    args: List[PathArgDetails] = Field(default_factory=list)
+
+    # TODO Add validation of path and args
+
+
+class ApiEndpointDetails(BaseModel):
+    path_details: PathDetails
+    method: HttpMethod
+    status: HttpStatusCodes
+    response_model: Type[BaseModel]
+    payload_model: Optional[Type[BaseModel]] = None
+
+
+def handle_exception_responses(handler: Callable[[P], R]) -> Callable[[P], R]:
     """
     Decoration that catches know and unknown exceptions from the API handler
     and returns a http response
     """
 
-    def wrapper(*args, **kwargs) -> Dict[str, Any]:
+    @wraps(handler)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         try:
             return handler(*args, **kwargs)
 
@@ -53,10 +91,11 @@ def handle_exception_responses(handler: Callable) -> Callable:
     return wrapper
 
 
-def log_event_response(handler: Callable) -> Callable:
+def log_event_response(handler: Callable[[P], R]) -> Callable[[P], R]:
     """ Logs the input event and response as JSON """
 
-    def wrapper(*args, **kwargs) -> Any:
+    @wraps(handler)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         evt = args[0]
         logging.info(f'evt = {json.dumps(evt)}')
         rsp = handler(*args, **kwargs)
@@ -66,10 +105,11 @@ def log_event_response(handler: Callable) -> Callable:
     return wrapper
 
 
-def parse_body(handler: Callable) -> Callable:
+def parse_body(handler: Callable[[P], R]) -> Callable[[P], R]:
     """ Parse the json str in evt['body'] in place """
 
-    def wrapper(*args, **kwargs) -> Any:
+    @wraps(handler)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         evt = args[0]
         if evt.get('body'):
             evt['body'] = json.loads(evt['body'])
@@ -78,13 +118,22 @@ def parse_body(handler: Callable) -> Callable:
     return wrapper
 
 
-def lambda_api_handler(handler: Callable) -> Callable:
-    """ Wraps all the API decorators in order. This should be attached to all API lambda handlers """
+def lambda_api_handler(endpoint_details: ApiEndpointDetails = None) -> Callable[[P], R]:
+    """
+     Wraps all the API decorators in order and
+     adds endpoint description which is used to generate api docs and for generation for API GW infrastructure.
+     This should be attached to all API lambda handlers
+     """
 
-    @handle_exception_responses
-    @log_event_response
-    @parse_body
-    def wrapper(*args, **kwargs) -> Any:
-        return asyncio.run(handler(*args, **kwargs))
+    def decorator(handler: Callable[[P], Awaitable[R]]) -> Callable[[P], R]:
+        @handle_exception_responses
+        @log_event_response
+        @parse_body
+        @wraps(handler)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            return asyncio.run(handler(*args, **kwargs))
 
-    return wrapper
+        wrapper.endpoint_details = endpoint_details
+        return wrapper
+
+    return decorator

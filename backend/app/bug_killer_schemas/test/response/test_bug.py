@@ -1,6 +1,6 @@
 import arrow
 
-from bug_killer_schemas.models.bug import Bug
+from bug_killer_schemas.entities.bug import Bug
 from bug_killer_schemas.response.bug import BugResponse
 
 

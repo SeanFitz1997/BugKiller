@@ -4,8 +4,8 @@ from typing import Optional, List
 import arrow
 from arrow import Arrow
 
-from bug_killer_schemas.models.bug import Bug
-from bug_killer_schemas.models.project import Project
+from bug_killer_schemas.entities.bug import Bug
+from bug_killer_schemas.entities.project import Project
 from bug_killer_schemas.test.doubles.default_values import mock_project_title, mock_project_description, \
     mock_manager_id, mock_project_tags, mock_team_member_id
 from bug_killer_schemas.test.doubles.models.bug import create_test_bug

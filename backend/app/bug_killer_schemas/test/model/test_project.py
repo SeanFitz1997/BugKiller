@@ -1,7 +1,7 @@
 import arrow
 
-from bug_killer_schemas.models.bug import BugResolution, Bug
-from bug_killer_schemas.models.project import Project
+from bug_killer_schemas.entities.bug import BugResolution, Bug
+from bug_killer_schemas.entities.project import Project
 
 
 def test_project():

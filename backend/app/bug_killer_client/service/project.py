@@ -1,6 +1,7 @@
 import bug_killer_client.network.project as project_client
 from bug_killer_schemas.request.project import CreateProjectPayload, UpdateProjectPayload
 from bug_killer_schemas.response.project import UserProjectsResponse, ProjectResponse
+from bug_killer_schemas.test.doubles.models.project import create_test_project
 
 
 async def get_user_projects(auth: str) -> UserProjectsResponse:
@@ -51,3 +52,11 @@ async def delete_project(auth: str, project_id: str) -> ProjectResponse:
     """
     raw_rsp = await project_client.delete_project(auth, project_id)
     return ProjectResponse.parse_obj(raw_rsp)
+
+
+def demo_operation(test_val: str) -> ProjectResponse:
+    """
+    A demo command
+    test_val: info ...
+    """
+    return create_test_project()

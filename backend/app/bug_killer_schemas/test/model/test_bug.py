@@ -1,6 +1,6 @@
 import arrow
 
-from bug_killer_schemas.models.bug import BugResolution, Bug
+from bug_killer_schemas.entities.bug import BugResolution, Bug
 
 
 def test_bug_resolution():

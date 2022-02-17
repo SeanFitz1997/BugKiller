@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Optional
 
-from bug_killer_schemas.models.bug import BugResolution
+from bug_killer_schemas.entities.bug import BugResolution
 
 
 # 400 Exceptions
