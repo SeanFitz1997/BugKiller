@@ -1,7 +1,9 @@
+import uuid
 from typing import Optional, List
 
 from pydantic import validator, Field
 
+from bug_killer_schemas.test.doubles.default_values import mock_bug_title, mock_bug_description, mock_bug_tags
 from bug_killer_utils.collections import remove_duplicates_in_list
 from bug_killer_utils.model.bk_base_model import BkBaseModel
 
@@ -19,6 +21,21 @@ class CreateBugPayload(BkBaseModel):
             return None
         return sorted(remove_duplicates_in_list(value))
 
+    @classmethod
+    def test_double(
+            cls, *,
+            project_id: Optional[str] = None,
+            title: Optional[str] = None,
+            description: Optional[str] = None,
+            tags: Optional[List[str]] = None
+    ) -> 'CreateBugPayload':
+        return cls(
+            project_id=project_id or str(uuid.uuid4()),
+            title=title or mock_bug_title,
+            description=description or mock_bug_description,
+            tags=tags or mock_bug_tags
+        )
+
 
 class UpdateBugPayload(BkBaseModel):
     """ Details to update an existing bug """
@@ -31,3 +48,16 @@ class UpdateBugPayload(BkBaseModel):
         if value is None:
             return None
         return sorted(remove_duplicates_in_list(value))
+
+    @classmethod
+    def test_double(
+            cls, *,
+            title: Optional[str] = None,
+            description: Optional[str] = None,
+            tags: Optional[List[str]] = None,
+    ) -> 'UpdateBugPayload':
+        return UpdateBugPayload(
+            title=title or mock_bug_title,
+            description=description or mock_bug_description,
+            tags=tags or mock_bug_tags
+        )

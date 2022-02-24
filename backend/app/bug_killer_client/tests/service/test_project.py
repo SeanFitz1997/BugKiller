@@ -4,10 +4,9 @@ from bug_killer_client.service.project import get_user_projects, get_project, cr
     delete_project
 from bug_killer_client.tests.helpers import create_mock_response, assert_expected_network_call
 from bug_killer_client.util import get_auth_headers
-from bug_killer_schemas.request.project import UpdateProjectPayload
-from bug_killer_schemas.test.doubles.models.project import create_test_project
-from bug_killer_schemas.test.doubles.request.project import create_test_create_project_payload
-from bug_killer_schemas.test.doubles.response.project import create_test_user_projects_rsp, create_test_project_rsp
+from bug_killer_schemas.entities.project import Project
+from bug_killer_schemas.request.project import UpdateProjectPayload, CreateProjectPayload
+from bug_killer_schemas.response.project import UserProjectsResponse, ProjectResponse
 from bug_killer_utils.function import run_async
 
 
@@ -18,7 +17,7 @@ project_id = '123'
 @patch('bug_killer_client.network.project.requests')
 def test_get_user_projects(mock_requests):
     # Given
-    expected_rsp = create_test_user_projects_rsp()
+    expected_rsp = UserProjectsResponse.test_double()
     mock_get = MagicMock(return_value=create_mock_response(200, expected_rsp.api_dict()))
     mock_requests.get = mock_get
 
@@ -33,8 +32,8 @@ def test_get_user_projects(mock_requests):
 @patch('bug_killer_client.network.project.requests')
 def test_get_project(mock_requests):
     # Given
-    project = create_test_project(project_id)
-    expected_rsp = create_test_project_rsp(project)
+    project = Project.test_double(project_id=project_id)
+    expected_rsp = ProjectResponse.test_double(project=project)
     mock_get = MagicMock(return_value=create_mock_response(200, expected_rsp.api_dict()))
     mock_requests.get = mock_get
 
@@ -49,8 +48,8 @@ def test_get_project(mock_requests):
 @patch('bug_killer_client.network.project.requests')
 def test_create_project(mock_requests):
     # Given
-    payload = create_test_create_project_payload()
-    expected_rsp = create_test_project_rsp()
+    payload = CreateProjectPayload.test_double()
+    expected_rsp = ProjectResponse.test_double()
     mock_post = MagicMock(return_value=create_mock_response(201, expected_rsp.api_dict()))
     mock_requests.post = mock_post
 
@@ -67,8 +66,8 @@ def test_create_project(mock_requests):
 def test_update_project(mock_requests):
     # Given
     payload = UpdateProjectPayload(title='test update')
-    project = create_test_project(project_id)
-    expected_rsp = create_test_project_rsp(project)
+    project = Project.test_double(project_id=project_id)
+    expected_rsp = ProjectResponse(project=project)
     mock_patch = MagicMock(return_value=create_mock_response(200, expected_rsp.api_dict()))
     mock_requests.patch = mock_patch
 
@@ -88,8 +87,8 @@ def test_update_project(mock_requests):
 @patch('bug_killer_client.network.project.requests')
 def test_delete_project(mock_requests):
     # Given
-    project = create_test_project(project_id)
-    expected_rsp = create_test_project_rsp(project)
+    project = Project.test_double(project_id=project_id)
+    expected_rsp = ProjectResponse.test_double(project=project)
     mock_delete = MagicMock(return_value=create_mock_response(200, expected_rsp.api_dict()))
     mock_requests.delete = mock_delete
 

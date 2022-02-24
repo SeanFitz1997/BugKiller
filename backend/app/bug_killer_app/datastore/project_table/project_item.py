@@ -9,10 +9,10 @@ from bug_killer_app.domain.enviorment import DdbVariables
 
 
 class ProjectAssociationPrefix(str, Enum):
-    PROJECT = "P"
-    BUG = "B"
-    MANAGER = "MA"
-    MEMBER = "ME"
+    PROJECT = 'P'
+    BUG = 'B'
+    MANAGER = 'MA'
+    MEMBER = 'ME'
 
 
 class ProjectItem(Model):

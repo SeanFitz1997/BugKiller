@@ -2,13 +2,36 @@ from typing import Any, Dict
 
 from bug_killer_app.access.entities.bug import create_project_bug, delete_project_bug, resolve_project_bug, get_bug, \
     update_project_bug
-from bug_killer_app.domain.api_handler import lambda_api_handler, ApiEndpointDetails, PathDetails, PathArgDetails, \
-    HttpMethod
+from bug_killer_app.domain.api_handler import lambda_api_handler, ApiEndpointDetails, PathDetails, HttpMethod, \
+    ParamArgDetails
 from bug_killer_app.domain.request import get_auth_user, get_path_param, parse_dto, get_event_body
-from bug_killer_app.domain.response import HttpStatusCodes, \
-    HttpResponse
-from bug_killer_schemas.request.bug import CreateBugPayload
+from bug_killer_app.domain.response import HttpStatusCodes, HttpResponse
+from bug_killer_schemas.request.bug import CreateBugPayload, UpdateBugPayload
 from bug_killer_schemas.response.bug import BugResponse
+
+
+@lambda_api_handler(
+    ApiEndpointDetails(
+        path_details=PathDetails(path='/bugs/'),
+        method=HttpMethod.POST,
+        payload_model=CreateBugPayload,
+        status=HttpStatusCodes.CREATED_STATUS,
+        response_model=BugResponse
+    )
+)
+async def create_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
+    """ Creates a new bug for a project """
+    user_id = get_auth_user(evt)
+    payload = parse_dto(get_event_body(evt), CreateBugPayload)
+
+    bug = await create_project_bug(user_id, payload)
+
+    endpoint_details = create_bug_handler.endpoint_details
+    rsp_model = endpoint_details.response_model
+    rsp_status = endpoint_details.status
+
+    rsp = rsp_model(project_id=payload.project_id, bug=bug)
+    return HttpResponse(status_code=rsp_status, body=rsp.api_dict()).api_dict()
 
 
 @lambda_api_handler(
@@ -16,7 +39,7 @@ from bug_killer_schemas.response.bug import BugResponse
         path_details=PathDetails(
             path='/bugs/{bugId}',
             args=[
-                PathArgDetails(name='bugId', description='The id of the bug to get')
+                ParamArgDetails(name='bugId', description='The id of the bug to get')
             ]
         ),
         method=HttpMethod.GET,
@@ -40,35 +63,12 @@ async def get_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
 
 @lambda_api_handler(
     ApiEndpointDetails(
-        path_details=PathDetails(path='/bugs/'),
-        method=HttpMethod.POST,
-        status=HttpStatusCodes.CREATED_STATUS,
-        response_model=BugResponse
-    )
-)
-async def create_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
-    """ Creates a new bug for a project """
-    user_id = get_auth_user(evt)
-    payload = parse_dto(get_event_body(evt), CreateBugPayload)
-
-    bug = await create_project_bug(user_id, payload)
-
-    rsp_model = get_bug_handler.endpoint_details.response_model
-    rsp_status = get_bug_handler.endpoint_details.status
-
-    rsp = rsp_model(project_id=payload.project_id, bug=bug)
-    return HttpResponse(status_code=rsp_status, body=rsp.api_dict()).api_dict()
-
-
-@lambda_api_handler(
-    ApiEndpointDetails(
         path_details=PathDetails(
             path='/bugs/{bugId}',
-            args=[
-                PathArgDetails(name='bugId', description='The id of the bug to update')
-            ]
+            args=[ParamArgDetails(name='bugId', description='The id of the bug to update')]
         ),
         method=HttpMethod.PATCH,
+        payload_model=UpdateBugPayload,
         status=HttpStatusCodes.OK_STATUS,
         response_model=BugResponse
     )
@@ -94,7 +94,7 @@ async def update_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
     ApiEndpointDetails(
         path_details=PathDetails(
             path='/bugs/{bugId}/resolve',
-            args=[PathArgDetails(name='bugId', description='The id of the bug to resolve')]
+            args=[ParamArgDetails(name='bugId', description='The id of the bug to resolve')]
         ),
         method=HttpMethod.PATCH,
         status=HttpStatusCodes.OK_STATUS,
@@ -119,7 +119,7 @@ async def resolve_bug_handler(evt: Dict[str, Any], _) -> Dict[str, Any]:
     ApiEndpointDetails(
         path_details=PathDetails(
             path='/bugs/{bugId}',
-            args=[PathArgDetails(name='bugId', description='The id of the bug to delete')]
+            args=[ParamArgDetails(name='bugId', description='The id of the bug to delete')]
         ),
         method=HttpMethod.DELETE,
         status=HttpStatusCodes.OK_STATUS,

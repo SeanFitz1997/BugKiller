@@ -1,11 +1,12 @@
 import asyncio
 import json
 import logging
+import re
 from enum import Enum
 from functools import wraps
-from typing import Callable, TypeVar, Awaitable, Optional, Type, List
+from typing import Callable, TypeVar, Awaitable, Optional, Type, List, Any, Dict
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from typing_extensions import ParamSpec
 
 from bug_killer_app.domain.exceptions import UnauthorizedProjectAccessException, MissingAuthHeaderException, \
@@ -26,7 +27,7 @@ class HttpMethod(str, Enum):
     DELETE = 'delete'
 
 
-class PathArgDetails(BaseModel):
+class ParamArgDetails(BaseModel):
     name: str
     description: str
     is_required: bool = True
@@ -34,9 +35,19 @@ class PathArgDetails(BaseModel):
 
 class PathDetails(BaseModel):
     path: str
-    args: List[PathArgDetails] = Field(default_factory=list)
+    args: List[ParamArgDetails] = Field(default_factory=list)
 
-    # TODO Add validation of path and args
+    @validator('args')
+    def validate_args(cls, value: List[ParamArgDetails], values: Dict[str, Any]) -> List[ParamArgDetails]:
+        """ TODO """
+        args_in_path = set(re.findall(r'\{(.*?)}', values['path']))
+        args_in_params = set(arg.name for arg in value)
+
+        if not args_in_params == args_in_path:
+            arg_diff = args_in_path.symmetric_difference(args_in_params)
+            raise ValueError(f'The parameters in the path and params do not match. {arg_diff = }')
+
+        return value
 
 
 class ApiEndpointDetails(BaseModel):
@@ -118,7 +129,7 @@ def parse_body(handler: Callable[[P], R]) -> Callable[[P], R]:
     return wrapper
 
 
-def lambda_api_handler(endpoint_details: ApiEndpointDetails = None) -> Callable[[P], R]:
+def lambda_api_handler(endpoint_details: ApiEndpointDetails) -> Callable[[P], R]:
     """
      Wraps all the API decorators in order and
      adds endpoint description which is used to generate api docs and for generation for API GW infrastructure.

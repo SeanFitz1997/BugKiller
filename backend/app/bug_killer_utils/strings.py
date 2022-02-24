@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, Optional
 
 
 def snake_case_to_camel_case(x: str) -> str:
@@ -28,3 +28,7 @@ def find_all_text_in_single_quotes(text: str) -> List[str]:
 
 def remove_prefix(prefix: str, string: str) -> str:
     return string.split(prefix, maxsplit=1)[-1]
+
+
+def is_blank(x: Optional[str]) -> bool:
+    return not x or not x.strip()

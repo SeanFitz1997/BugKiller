@@ -17,7 +17,7 @@ from bug_killer_utils.collections import flatten
 
 
 async def get_user_association_items(user_id: str) -> Tuple[List[ProjectItem], List[ProjectItem]]:
-    logging.info(f"Getting user {user_id} project association items")
+    logging.info(f'Getting user {user_id} project association items')
     manager_items, member_items = await asyncio.gather(
         _get_user_project_association_items(ProjectAssociationPrefix.MANAGER.value + user_id),
         _get_user_project_association_items(ProjectAssociationPrefix.MEMBER.value + user_id)
@@ -27,16 +27,16 @@ async def get_user_association_items(user_id: str) -> Tuple[List[ProjectItem], L
 
 
 async def _get_user_project_association_items(hk: str) -> List[ProjectItem]:
-    logging.info(f"Getting user project association items by HK: {hk}")
+    logging.info(f'Getting user project association items by HK: {hk}')
     association_items = list(ProjectItem.user_project_index.query(hash_key=hk))
-    logging.info(f"Got {association_items = }")
+    logging.info(f'Got {association_items = }')
     return association_items
 
 
 async def get_all_project_items(project_id: str) -> AllProjectItems:
-    logging.info(f"Getting all project items with HK: {project_id}")
+    logging.info(f'Getting all project items with HK: {project_id}')
     items = list(ProjectItem.query(project_id))
-    logging.info(f"Got project {items = }")
+    logging.info(f'Got project {items = }')
     return group_project_items(project_id, items)
 
 
@@ -70,7 +70,7 @@ def group_project_items(project_id: str, items: List[ProjectItem]) -> AllProject
     if not manager_item:
         raise ManagerNotFoundException(project_id)
 
-    logging.info(f"Grouped items: {project_item = }, {manager_item = }, {member_items = }, {bug_items = }")
+    logging.info(f'Grouped items: {project_item = }, {manager_item = }, {member_items = }, {bug_items = }')
     return project_item, manager_item, member_items, bug_items
 
 

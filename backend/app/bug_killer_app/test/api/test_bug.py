@@ -11,10 +11,9 @@ from bug_killer_app.test.helpers import create_event, assert_response, assert_di
     assert_dict_attributes_equals, create_cognito_authorizer_request_context
 from bug_killer_app.test.test_doubles.db.transact_write import DummyTransactWrite
 from bug_killer_schemas.entities.bug import BugResolution
-from bug_killer_schemas.request.bug import UpdateBugPayload
+from bug_killer_schemas.request.bug import UpdateBugPayload, CreateBugPayload
+from bug_killer_schemas.request.project import CreateProjectPayload
 from bug_killer_schemas.response.bug import BugResponse
-from bug_killer_schemas.test.doubles.request.bug import create_test_create_bug_payload
-from bug_killer_schemas.test.doubles.request.project import create_test_create_project_payload
 from bug_killer_utils.dates import to_utc_str
 from bug_killer_utils.function import run_async
 
@@ -28,13 +27,13 @@ class TestGetBug(TestCase):
     def setUpClass(cls):
         project_with_bug_future = create_project(
             TestGetBug.USER1,
-            create_test_create_project_payload()
+            CreateProjectPayload.test_double()
         )
         cls.project_with_bug = run_async(project_with_bug_future)
 
         bug_to_get_future = create_project_bug(
             TestGetBug.USER1,
-            create_test_create_bug_payload(cls.project_with_bug.id)
+            CreateBugPayload.test_double(project_id=cls.project_with_bug.id)
         )
         cls.bug_to_get = run_async(bug_to_get_future)
 
@@ -121,7 +120,7 @@ class TestCreateBug(TestCase):
     def setUpClass(cls):
         project_future = create_project(
             TestCreateBug.USER1,
-            create_test_create_project_payload()
+            CreateProjectPayload.test_double()
         )
         cls.project = run_async(project_future)
 
@@ -154,7 +153,7 @@ class TestCreateBug(TestCase):
         user = 'lacks_access'
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(user),
-            body=create_test_create_bug_payload(self.project.id).api_dict()
+            body=CreateBugPayload.test_double(project_id=self.project.id).api_dict()
         )
 
         # When
@@ -172,7 +171,7 @@ class TestCreateBug(TestCase):
         project_id = 'does_not_exist'
         evt = create_event(
             request_context=create_cognito_authorizer_request_context('user'),
-            body=create_test_create_bug_payload(project_id).api_dict()
+            body=CreateBugPayload.test_double(project_id=project_id).api_dict()
         )
 
         # When
@@ -187,7 +186,7 @@ class TestCreateBug(TestCase):
 
     def test_user_creates_bug(self):
         # Given
-        payload = create_test_create_bug_payload(self.project.id)
+        payload = CreateBugPayload.test_double(project_id=self.project.id)
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(self.USER1),
             body=payload.api_dict()
@@ -216,12 +215,14 @@ class TestUpdateBug(TestCase):
     def setUpClass(cls):
         project_future = create_project(
             TestUpdateBug.USER1,
-            create_test_create_project_payload()
+            CreateProjectPayload.test_double()
         )
         cls.project = run_async(project_future)
 
-        bug_to_update_future = create_project_bug(cls.USER1, create_test_create_bug_payload(cls.project.id))
-        change_update_bug_future = create_project_bug(cls.USER1, create_test_create_bug_payload(cls.project.id))
+        bug_to_update_future = create_project_bug(
+            cls.USER1, CreateBugPayload.test_double(project_id=cls.project.id))
+        change_update_bug_future = create_project_bug(
+            cls.USER1, CreateBugPayload.test_double(project_id=cls.project.id))
         cls.bug_to_update = run_async(bug_to_update_future)
         cls.change_update_bug = run_async(change_update_bug_future)
 
@@ -362,12 +363,12 @@ class TestResolveBug(TestCase):
     def setUpClass(cls):
         project_future = create_project(
             TestResolveBug.USER1,
-            create_test_create_project_payload()
+            CreateProjectPayload.test_double()
         )
         cls.project = run_async(project_future)
 
-        bug_to_resolve_future = create_project_bug(cls.USER1, create_test_create_bug_payload(cls.project.id))
-        resolved_bug_future = create_project_bug(cls.USER1, create_test_create_bug_payload(cls.project.id))
+        bug_to_resolve_future = create_project_bug(cls.USER1, CreateBugPayload.test_double(project_id=cls.project.id))
+        resolved_bug_future = create_project_bug(cls.USER1, CreateBugPayload.test_double(project_id=cls.project.id))
 
         cls.bug_to_resolve = run_async(bug_to_resolve_future)
 
@@ -481,11 +482,11 @@ class TestDeleteBug(TestCase):
     def setUpClass(cls):
         project_future = create_project(
             TestDeleteBug.USER1,
-            create_test_create_project_payload()
+            CreateProjectPayload.test_double()
         )
         cls.project = run_async(project_future)
 
-        bug_to_delete_future = create_project_bug(cls.USER1, create_test_create_bug_payload(cls.project.id))
+        bug_to_delete_future = create_project_bug(cls.USER1, CreateBugPayload.test_double(project_id=cls.project.id))
         cls.bug_to_delete = run_async(bug_to_delete_future)
 
     def test_error_when_missing_auth_header(self):

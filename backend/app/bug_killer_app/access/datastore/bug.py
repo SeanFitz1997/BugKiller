@@ -12,7 +12,7 @@ from bug_killer_schemas.request.project import CreateProjectPayload
 
 async def get_bug_item_by_id(bug_id: str) -> ProjectItem:
     hk = ProjectAssociationPrefix.BUG.value + bug_id
-    logging.info(f'Getting bug db item by HK: {hk}')
+    logging.info(f'Getting bug db item by {hk = }')
 
     bug_items = list(ProjectItem.user_project_index.query(hk))
 
@@ -25,7 +25,7 @@ async def get_bug_item_by_id(bug_id: str) -> ProjectItem:
 
 async def create_bug_item(payload: CreateProjectPayload) -> ProjectItem:
     bug_id = str(uuid.uuid4())
-    now = arrow.utcnow().floor('second')
+    now = arrow.utcnow()
 
     bug_item = ProjectItem(
         project_id=payload.project_id,
@@ -37,7 +37,7 @@ async def create_bug_item(payload: CreateProjectPayload) -> ProjectItem:
         last_updated_on=now,
     )
 
-    logging.info(f"Creating {bug_item = }")
+    logging.info(f'Creating {bug_item = }')
     bug_item.save()
 
     return bug_item

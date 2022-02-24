@@ -13,4 +13,3 @@ class ApiVariables:
 
     # ATTN: This value can be updated
     API_URL = os.environ.get('API_URL', Defaults.API_URL)
-   

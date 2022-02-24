@@ -6,13 +6,15 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 coverage = "*"
+apispec = "*"
+pyyaml = "*"
+mypy = "*"
 
 [packages]
 pynamodb = "*"
 arrow = "*"
 requests = "*"
-dataclass-wizard = "*"
 pydantic = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

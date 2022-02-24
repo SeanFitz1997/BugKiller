@@ -26,7 +26,7 @@ async def get_bug(user_id: str, bug_id: str) -> Tuple[str, BkAppBug]:
 
 
 async def create_project_bug(user_id: str, payload: CreateBugPayload) -> BkAppBug:
-    logging.info(f"Creating project bug with {payload = }")
+    logging.info(f'Creating project bug with {payload = }')
 
     project = await get_project(payload.project_id)
     assert_user_has_project_manager_access(user_id, project)
@@ -64,7 +64,7 @@ async def resolve_project_bug(user_id: str, bug_id: str) -> Tuple[str, BkAppBug]
 
 
 async def delete_project_bug(user_id: str, bug_id: str) -> Tuple[str, BkAppBug]:
-    logging.info(f"Deleting project bug {user_id = } {bug_id = }")
+    logging.info(f'Deleting project bug {user_id = } {bug_id = }')
 
     project_id, bug = await get_bug(user_id, bug_id)
 

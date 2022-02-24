@@ -22,4 +22,3 @@ coverage html
 Generate requirements file (needed for deployment)
 
 ```pipenv lock -r > requirements.txt```
-

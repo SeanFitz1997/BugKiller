@@ -11,9 +11,8 @@ from bug_killer_app.domain.response import HttpStatusCodes, message_body
 from bug_killer_app.test.helpers import create_event, assert_response, assert_dict_attributes_not_none, \
     assert_dict_attributes_equals, create_cognito_authorizer_request_context
 from bug_killer_app.test.test_doubles.db.transact_write import DummyTransactWrite
-from bug_killer_schemas.request.project import UpdateProjectPayload
+from bug_killer_schemas.request.project import UpdateProjectPayload, CreateProjectPayload
 from bug_killer_schemas.response.project import UserProjectsResponse, ProjectResponse
-from bug_killer_schemas.test.doubles.request.project import create_test_create_project_payload
 from bug_killer_utils.collections import remove_none_values_from_dict
 from bug_killer_utils.function import run_async
 
@@ -28,11 +27,11 @@ class TestGetUserProjects(TestCase):
     def setUpClass(cls):
         manager_project_future = create_project(
             TestGetUserProjects.USER_WITH_PROJECTS,
-            create_test_create_project_payload()
+            CreateProjectPayload.test_double()
         )
         member_project_future = create_project(
             'some_other_user',
-            create_test_create_project_payload(members=[cls.USER_WITH_PROJECTS])
+            CreateProjectPayload.test_double(members=[cls.USER_WITH_PROJECTS])
         )
 
         cls.manager_project = run_async(manager_project_future)
@@ -83,7 +82,7 @@ class TestGetProject(TestCase):
     @classmethod
     @patch('bug_killer_app.access.datastore.project.TransactWrite', new=DummyTransactWrite)
     def setUpClass(cls):
-        get_project_future = create_project(cls.USER1, create_test_create_project_payload())
+        get_project_future = create_project(cls.USER1, CreateProjectPayload.test_double())
 
         cls.get_project = run_async(get_project_future)
 
@@ -191,7 +190,7 @@ class TestCreateProject(TestCase):
     def test_user_creates_project(self):
         # Given
         user = 'user'
-        payload = create_test_create_project_payload()
+        payload = CreateProjectPayload.test_double()
         evt = create_event(
             request_context=create_cognito_authorizer_request_context(user),
             body=payload.api_dict()
@@ -214,7 +213,7 @@ class TestUpdateProject(TestCase):
     @classmethod
     @patch('bug_killer_app.access.datastore.project.TransactWrite', new=DummyTransactWrite)
     def setUpClass(cls):
-        update_project_future = create_project(cls.USER1, create_test_create_project_payload())
+        update_project_future = create_project(cls.USER1, CreateProjectPayload.test_double())
 
         cls.update_project = run_async(update_project_future)
 
@@ -335,8 +334,8 @@ class TestDeleteProject(TestCase):
     @classmethod
     @patch('bug_killer_app.access.datastore.project.TransactWrite', new=DummyTransactWrite)
     def setUpClass(cls):
-        delete_project_future = create_project(cls.USER1, create_test_create_project_payload())
-        lack_access_project_future = create_project(cls.USER1, create_test_create_project_payload())
+        delete_project_future = create_project(cls.USER1, CreateProjectPayload.test_double())
+        lack_access_project_future = create_project(cls.USER1, CreateProjectPayload.test_double())
 
         cls.delete_project = run_async(delete_project_future)
         cls.lack_access_project = run_async(lack_access_project_future)

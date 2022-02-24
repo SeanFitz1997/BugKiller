@@ -39,7 +39,7 @@ async def get_project(project_id: str) -> BkAppProject:
 
 
 async def create_project(manager_id: str, payload: CreateProjectPayload) -> BkAppProject:
-    logging.info(f"Creating project with {manager_id = } {payload = }")
+    logging.info(f'Creating project with {manager_id = } {payload = }')
     project_item, manager_item, member_items = await create_project_items(manager_id, payload)
 
     project = BkAppProject.from_db_items(
@@ -54,7 +54,7 @@ async def create_project(manager_id: str, payload: CreateProjectPayload) -> BkAp
 
 
 async def update_project(user_id: str, project_id: str, payload: UpdateProjectPayload) -> BkAppProject:
-    logging.info(f"Updating project with {user_id = } {project_id = } {payload = }")
+    logging.info(f'Updating project with {user_id = } {project_id = } {payload = }')
 
     if is_dict_empty(payload.api_dict()):
         raise EmptyUpdateException()
@@ -84,13 +84,13 @@ def _get_project_items_to_update(
     items_to_update = []
     if (payload.title and payload.title != project_item.title) or \
             (payload.description and payload.description != project_item.description):
-        logging.info("Updating project title and/or description")
+        logging.info('Updating project title and/or description')
         project_item.title = payload.title if payload.title else project_item.title
         project_item.description = payload.description if payload.description else project_item.description
         items_to_update.append(project_item)
 
     if payload.manager and payload.manager != manager:
-        logging.info("Updating project manager")
+        logging.info('Updating project manager')
         manager_item.project_association = ProjectAssociationPrefix.MANAGER.value + payload.manager
         items_to_update.append(manager_item)
 
@@ -98,12 +98,12 @@ def _get_project_items_to_update(
 
 
 async def delete_project(user_id: str, project_id: str) -> BkAppProject:
-    logging.info(f"Deleting project with {user_id = } {project_id = }")
+    logging.info(f'Deleting project with {user_id = } {project_id = }')
     project = await get_project(project_id)
 
     assert_user_has_project_manager_access(user_id, project)
 
-    logging.info(f"Deleting {project = }")
+    logging.info(f'Deleting {project = }')
     await delete_project_items(project.to_db_items())
 
     return project

@@ -10,7 +10,7 @@ class BkAppBug(Bug):
     _BUG_RESOLUTION_CLS = BkAppBugResolution
 
     @classmethod
-    def from_db_item(cls: type, db_item: ProjectItem) -> "BkAppBug":
+    def from_db_item(cls: type, db_item: ProjectItem) -> 'BkAppBug':
         bug_id = remove_prefix(ProjectAssociationPrefix.BUG.value, db_item.project_association)
         bug_resolution = (
             BkAppBugResolution.from_db_attribute(db_item.bug_resolution)

@@ -18,12 +18,12 @@ def wait_for_port_to_open(
         sleep(attempt_wait)
         attempts -= 1
 
-    raise TimeoutError(f"Port {port} did not open")
+    raise TimeoutError(f'Port {port} did not open')
 
 
 def is_port_open(port: int) -> bool:
     ddb_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    check = ddb_socket.connect_ex(("127.0.0.1", port))
+    check = ddb_socket.connect_ex(('127.0.0.1', port))
     ddb_socket.close()
     return check == 0
 

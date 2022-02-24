@@ -23,8 +23,8 @@ class HttpResponse(BkBaseModel):
     body: Dict[str, Any] = Field(default_factory=dict)
 
     _DEFAULT_HEADERS = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": True
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': True
     }
 
     def api_dict(self) -> Dict[str, Any]:

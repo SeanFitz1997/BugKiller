@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import Field, validator
 
@@ -17,7 +17,24 @@ class UserProjectsResponse(BkBaseModel):
         sort_by_create_date(projects)
         return projects
 
+    @classmethod
+    def test_double(
+            cls, *,
+            manager_projects: Optional[List[Project]] = None,
+            member_projects: Optional[List[Project]] = None
+    ) -> 'UserProjectsResponse':
+        return UserProjectsResponse(
+            manager_projects=manager_projects or [Project.test_double()],
+            member_projects=member_projects or [Project.test_double()]
+        )
+
 
 class ProjectResponse(BkBaseModel):
     """ Details on a single project """
     project: Project
+
+    @classmethod
+    def test_double(cls, *, project: Optional[Project] = None) -> 'ProjectResponse':
+        return ProjectResponse(
+            project=project or Project.test_double()
+        )
