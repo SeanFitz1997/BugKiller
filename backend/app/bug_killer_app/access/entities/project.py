@@ -2,6 +2,7 @@ import asyncio
 import logging
 from typing import List, Tuple
 
+from bug_killer_api_interface.schemas.request.project import UpdateProjectPayload, CreateProjectPayload
 from bug_killer_app.access.datastore.project import get_user_association_items, create_project_items, \
     update_project_items, delete_project_items, get_all_project_items
 from bug_killer_app.access.entities.permission import assert_user_has_project_manager_access
@@ -9,7 +10,6 @@ from bug_killer_app.datastore.project_table.project_item import ProjectItem, Pro
 from bug_killer_app.domain.exceptions import EmptyUpdateException, NoChangesInUpdateException
 from bug_killer_app.domain.types import AllProjectItems
 from bug_killer_app.models.project import BkAppProject
-from bug_killer_schemas.request.project import UpdateProjectPayload, CreateProjectPayload
 from bug_killer_utils.collections import is_dict_empty
 from bug_killer_utils.strings import remove_prefix
 

@@ -3,11 +3,10 @@ import uuid
 
 import arrow
 
+from bug_killer_api_interface.schemas.request.bug import CreateBugPayload, UpdateBugPayload
 from bug_killer_app.datastore.attributes.bug_resolution_map import BugResolutionMapAttribute
 from bug_killer_app.datastore.project_table.project_item import ProjectItem, ProjectAssociationPrefix
 from bug_killer_app.domain.exceptions import NoChangesInUpdateException, BugNotFoundException, MultipleBugMatchException
-from bug_killer_schemas.request.bug import UpdateBugPayload
-from bug_killer_schemas.request.project import CreateProjectPayload
 
 
 async def get_bug_item_by_id(bug_id: str) -> ProjectItem:
@@ -23,7 +22,7 @@ async def get_bug_item_by_id(bug_id: str) -> ProjectItem:
     return bug_items[0]
 
 
-async def create_bug_item(payload: CreateProjectPayload) -> ProjectItem:
+async def create_bug_item(payload: CreateBugPayload) -> ProjectItem:
     bug_id = str(uuid.uuid4())
     now = arrow.utcnow()
 
@@ -56,7 +55,7 @@ async def update_bug_item(bug_item: ProjectItem, payload: UpdateBugPayload) -> P
 
     if payload.tags and payload.tags != bug_item.tags:
         has_item_updated = True
-        bug_item.tags = payload.tags
+        bug_item.tags = set(payload.tags)
 
     if has_item_updated:
         bug_item.save()

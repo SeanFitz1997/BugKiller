@@ -1,18 +1,18 @@
 import asyncio
 import logging
 import uuid
-from typing import List, Tuple, NoReturn
+from typing import List, Tuple
 
 import arrow
 from pynamodb.connection import Connection
 from pynamodb.transactions import TransactWrite
 
+from bug_killer_api_interface.schemas.request.project import CreateProjectPayload
 from bug_killer_app.datastore.project_table.project_item import ProjectItem, ProjectAssociationPrefix
 from bug_killer_app.domain.enviorment import DdbVariables
 from bug_killer_app.domain.exceptions import MultipleProjectMatchException, ProjectNotFoundException, \
     ManagerNotFoundException, MultipleManagerMatchException
 from bug_killer_app.domain.types import AllProjectItems
-from bug_killer_schemas.request.project import CreateProjectPayload
 from bug_killer_utils.collections import flatten
 
 
@@ -97,31 +97,35 @@ async def create_project_items(
         for member in payload.members
     ]
 
-    await _create_project_items(project_item, manager_item, member_items, [])
+    await _create_project_items((project_item, manager_item, member_items, []))
 
     return project_item, manager_item, member_items
 
 
-async def _create_project_items(*project_items: AllProjectItems) -> NoReturn:
+async def _create_project_items(project_items: AllProjectItems) -> None:
     project_item, manager_item, member_items, _ = project_items
     with TransactWrite(connection=Connection(region=DdbVariables.TABLE_REGION)) as transaction:
         logging.info(f'Transaction Write {project_item = } {manager_item = } {member_items = }')
         transaction.save(project_item)
         manager_item.save()
-        [transaction.save(item) for item in member_items]
+        for item in member_items:
+            transaction.save(item)
 
 
-def update_project_items(project_item: ProjectItem, update_items: List[ProjectItem]) -> NoReturn:
-    project_item.last_updated_on = arrow.utcnow()
+def update_project_items(project_item: ProjectItem, update_items: list[ProjectItem]) -> None:
+    project_item.last_updated_on = arrow.utcnow().datetime
+
     # Ensure that project item in updated too
-    update_items = set(update_items + [project_item])
+    update_items.append(project_item)
     with TransactWrite(connection=Connection(region=DdbVariables.TABLE_REGION)) as transaction:
         logging.info(f'Transaction Update {update_items = }')
-        [transaction.save(item) for item in update_items]
+        for item in update_items:
+            transaction.save(item)
 
 
-async def delete_project_items(project_items: AllProjectItems) -> NoReturn:
+async def delete_project_items(project_items: AllProjectItems) -> None:
     project_item, manager_item, member_items, bugs_items = project_items
     with TransactWrite(connection=Connection(region=DdbVariables.TABLE_REGION)) as transaction:
         logging.info(f'Transaction Delete {project_item = } {manager_item = } {member_items = } {bugs_items = }')
-        [transaction.delete(item) for item in flatten(project_items)]
+        for item in flatten(project_items):
+            transaction.delete(item)

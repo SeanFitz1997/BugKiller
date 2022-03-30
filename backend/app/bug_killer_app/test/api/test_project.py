@@ -4,15 +4,15 @@ from unittest.mock import patch
 
 import arrow
 
+from bug_killer_api_interface.schemas.request.project import UpdateProjectPayload, CreateProjectPayload
+from bug_killer_api_interface.schemas.response.project import UserProjectsResponse, ProjectResponse
 from bug_killer_app.access.entities.project import create_project
 from bug_killer_app.api.project import get_user_projects_handler, create_project_handler, update_project_handler, \
     delete_project_handler, get_project_handler
-from bug_killer_app.domain.response import HttpStatusCodes, message_body
+from bug_killer_app.domain.response import HttpStatusCode, message_body
 from bug_killer_app.test.helpers import create_event, assert_response, assert_dict_attributes_not_none, \
     assert_dict_attributes_equals, create_cognito_authorizer_request_context
 from bug_killer_app.test.test_doubles.db.transact_write import DummyTransactWrite
-from bug_killer_schemas.request.project import UpdateProjectPayload, CreateProjectPayload
-from bug_killer_schemas.response.project import UserProjectsResponse, ProjectResponse
 from bug_killer_utils.collections import remove_none_values_from_dict
 from bug_killer_utils.function import run_async
 
@@ -45,7 +45,7 @@ class TestGetUserProjects(TestCase):
         rsp = get_user_projects_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_user_with_no_projects(self):
         # Given
@@ -55,7 +55,7 @@ class TestGetUserProjects(TestCase):
         rsp = get_user_projects_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.OK_STATUS, UserProjectsResponse().api_dict())
+        assert_response(rsp, HttpStatusCode.OK_STATUS, UserProjectsResponse().api_dict())
 
     def test_user_with_projects(self):
         # Given
@@ -67,7 +67,7 @@ class TestGetUserProjects(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.OK_STATUS,
+            HttpStatusCode.OK_STATUS,
             UserProjectsResponse(
                 manager_projects=[self.manager_project],
                 member_projects=[self.member_project]
@@ -94,7 +94,7 @@ class TestGetProject(TestCase):
         rsp = get_project_handler(event_without_auth_header, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_error_when_missing_id_path_param(self):
         # Given
@@ -106,7 +106,7 @@ class TestGetProject(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('Missing required pathParameters parameter "projectId" in request')
         )
 
@@ -124,7 +124,7 @@ class TestGetProject(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.NOT_FOUND_STATUS,
+            HttpStatusCode.NOT_FOUND_STATUS,
             message_body(f'No project found with id: "{project_id}"')
         )
 
@@ -142,7 +142,7 @@ class TestGetProject(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.FORBIDDEN_STATUS,
+            HttpStatusCode.FORBIDDEN_STATUS,
             message_body(f'{user} does not have permission to read project {self.get_project.id}')
         )
 
@@ -157,7 +157,7 @@ class TestGetProject(TestCase):
         rsp = get_project_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.OK_STATUS, ProjectResponse(project=self.get_project).api_dict())
+        assert_response(rsp, HttpStatusCode.OK_STATUS, ProjectResponse(project=self.get_project).api_dict())
 
 
 class TestCreateProject(TestCase):
@@ -170,7 +170,7 @@ class TestCreateProject(TestCase):
         rsp = create_project_handler(event_without_auth_header, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_error_when_missing_required_param(self):
         # Given
@@ -182,7 +182,7 @@ class TestCreateProject(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('Missing required body parameter "title" in request')
         )
 
@@ -200,7 +200,7 @@ class TestCreateProject(TestCase):
         rsp = create_project_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.CREATED_STATUS)
+        assert_response(rsp, HttpStatusCode.CREATED_STATUS)
         project = json.loads(rsp['body'])['project']
         assert_dict_attributes_not_none(project, ['id', 'createdOn', 'lastUpdatedOn'])
         assert_dict_attributes_equals(project, {**payload.api_dict(), 'manager': user, 'bugs': []})
@@ -225,7 +225,7 @@ class TestUpdateProject(TestCase):
         rsp = update_project_handler(event_without_auth_header, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_error_when_user_lacks_permission_to_update(self):
         # Given
@@ -242,7 +242,7 @@ class TestUpdateProject(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.FORBIDDEN_STATUS,
+            HttpStatusCode.FORBIDDEN_STATUS,
             message_body(f'{user} does not have permission to update project {self.update_project.id}')
         )
 
@@ -261,7 +261,7 @@ class TestUpdateProject(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.NOT_FOUND_STATUS,
+            HttpStatusCode.NOT_FOUND_STATUS,
             message_body(f'No project found with id: "{project_id}"')
         )
 
@@ -277,7 +277,7 @@ class TestUpdateProject(TestCase):
         rsp = update_project_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.BAD_REQUEST_STATUS, message_body('No changes provided in update payload'))
+        assert_response(rsp, HttpStatusCode.BAD_REQUEST_STATUS, message_body('No changes provided in update payload'))
 
     def test_error_changes_match_the_existing_item(self):
         # Given
@@ -297,7 +297,7 @@ class TestUpdateProject(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('All changes in payload matches the existing record')
         )
 
@@ -319,7 +319,7 @@ class TestUpdateProject(TestCase):
         rsp = update_project_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.OK_STATUS)
+        assert_response(rsp, HttpStatusCode.OK_STATUS)
         project = json.loads(rsp['body'])['project']
 
         assert_dict_attributes_not_none(project, ['id', 'createdOn'])
@@ -348,7 +348,7 @@ class TestDeleteProject(TestCase):
         rsp = delete_project_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_error_when_user_lacks_permission(self):
         # Given
@@ -364,7 +364,7 @@ class TestDeleteProject(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.FORBIDDEN_STATUS,
+            HttpStatusCode.FORBIDDEN_STATUS,
             message_body(f'{user} does not have permission to update project {self.lack_access_project.id}')
         )
 
@@ -382,7 +382,7 @@ class TestDeleteProject(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.NOT_FOUND_STATUS,
+            HttpStatusCode.NOT_FOUND_STATUS,
             message_body(f'No project found with id: "{project_id}"')
         )
 
@@ -398,4 +398,4 @@ class TestDeleteProject(TestCase):
         rsp = delete_project_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.OK_STATUS, ProjectResponse(project=self.delete_project).api_dict())
+        assert_response(rsp, HttpStatusCode.OK_STATUS, ProjectResponse(project=self.delete_project).api_dict())

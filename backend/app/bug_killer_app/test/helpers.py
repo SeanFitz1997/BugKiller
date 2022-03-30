@@ -1,9 +1,9 @@
 import json
 import socket
 from time import sleep
-from typing import NoReturn, Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any
 
-from bug_killer_app.domain.response import HttpStatusCodes
+from bug_killer_app.domain.response import HttpStatusCode
 from bug_killer_utils.collections import is_jsonable
 
 
@@ -11,7 +11,7 @@ def wait_for_port_to_open(
         port: int,
         attempts: int = 3,
         attempt_wait: float = 0.5
-) -> NoReturn:
+) -> None:
     while attempts:
         if is_port_open(port):
             return
@@ -50,9 +50,9 @@ def create_cognito_authorizer_request_context(user_name: str) -> Dict:
 
 def assert_response(
         rsp: Dict[str, Any],
-        expected_status: Optional[HttpStatusCodes] = None,
+        expected_status: Optional[HttpStatusCode] = None,
         expected_body: Optional[dict] = None
-) -> NoReturn:
+) -> None:
     assert is_jsonable(rsp)
     if expected_status is not None:
         assert_response_status(rsp, expected_status)
@@ -60,20 +60,20 @@ def assert_response(
         assert_response_body(rsp, expected_body)
 
 
-def assert_response_status(rsp: Dict[str, Any], status_code: HttpStatusCodes) -> NoReturn:
+def assert_response_status(rsp: Dict[str, Any], status_code: HttpStatusCode) -> None:
     assert rsp['statusCode'] == status_code.value
 
 
-def assert_response_body(rsp: Dict[str, Any], body: Dict) -> NoReturn:
+def assert_response_body(rsp: Dict[str, Any], body: Dict) -> None:
     rsp_body = json.loads(rsp['body'])
     assert rsp_body == body
 
 
-def assert_dict_attributes_not_none(data: Dict, attributes: List) -> NoReturn:
+def assert_dict_attributes_not_none(data: Dict, attributes: List) -> None:
     for attr in attributes:
         assert data[attr] is not None
 
 
-def assert_dict_attributes_equals(data: Dict, value_checks: Dict) -> NoReturn:
+def assert_dict_attributes_equals(data: Dict, value_checks: Dict) -> None:
     for k, v in value_checks.items():
         assert data[k] == v

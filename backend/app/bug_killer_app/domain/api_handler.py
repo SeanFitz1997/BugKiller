@@ -1,150 +1,67 @@
+from __future__ import annotations
+
 import asyncio
 import json
 import logging
-import re
-from enum import Enum
 from functools import wraps
-from typing import Callable, TypeVar, Awaitable, Optional, Type, List, Any, Dict
+from typing import Callable
 
-from pydantic import BaseModel, Field, validator
-from typing_extensions import ParamSpec
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
-from bug_killer_app.domain.exceptions import UnauthorizedProjectAccessException, MissingAuthHeaderException, \
-    MissingRequiredRequestParamException, NotFoundException, MultipleMatchException, ManagerNotFoundException, \
-    EmptyUpdateException, NoChangesInUpdateException, AlreadyResolvedBugException
-from bug_killer_app.domain.response import UnAuthorizedResponse, BadRequestResponse, NotFoundResponse, \
-    InternalServerErrorResponse, message_body, ForbiddenResponse, HttpStatusCodes
+from bug_killer_api_interface.domain.endpoint.endpoint import EndpointDetails
+from bug_killer_app.domain.exceptions import ApiException
+from bug_killer_app.domain.response import message_body, HttpStatusCode, HttpResponse
+from bug_killer_app.domain.types import ApiGatewayEvt, ApiGatewayRsp, AsyncLambdaHandler, ApiGatewayRspLambdaHandler
 
 
-P = ParamSpec('P')
-R = TypeVar('R')
-
-
-class HttpMethod(str, Enum):
-    GET = 'get'
-    POST = 'post'
-    PATCH = 'patch'
-    DELETE = 'delete'
-
-
-class ParamArgDetails(BaseModel):
-    name: str
-    description: str
-    is_required: bool = True
-
-
-class PathDetails(BaseModel):
-    path: str
-    args: List[ParamArgDetails] = Field(default_factory=list)
-
-    @validator('args')
-    def validate_args(cls, value: List[ParamArgDetails], values: Dict[str, Any]) -> List[ParamArgDetails]:
-        """ TODO """
-        args_in_path = set(re.findall(r'\{(.*?)}', values['path']))
-        args_in_params = set(arg.name for arg in value)
-
-        if not args_in_params == args_in_path:
-            arg_diff = args_in_path.symmetric_difference(args_in_params)
-            raise ValueError(f'The parameters in the path and params do not match. {arg_diff = }')
-
-        return value
-
-
-class ApiEndpointDetails(BaseModel):
-    path_details: PathDetails
-    method: HttpMethod
-    status: HttpStatusCodes
-    response_model: Type[BaseModel]
-    payload_model: Optional[Type[BaseModel]] = None
-
-
-def handle_exception_responses(handler: Callable[[P], R]) -> Callable[[P], R]:
+def lambda_api_handler(endpoint_details: EndpointDetails) -> Callable[[AsyncLambdaHandler], ApiGatewayRspLambdaHandler]:
     """
-    Decoration that catches know and unknown exceptions from the API handler
-    and returns a http response
+    Decorator that adds addition common logic for all Api lambdas. It will:
+    * Log the evt & rsp
+    * Parse the request body
+    * Handle all known & unknown exceptions
+    * Format the Api rsp
+
+    This decorator will alter the function signature. It will:
+    * It will call the handler synchronously
+    * Add endpoint details as a function param
+    * It will format the http response
     """
 
-    @wraps(handler)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-        try:
-            return handler(*args, **kwargs)
+    def decorator(handler: AsyncLambdaHandler) -> ApiGatewayRspLambdaHandler:
 
-        # 400 Errors
-        except (
-                MissingRequiredRequestParamException, EmptyUpdateException, NoChangesInUpdateException,
-                AlreadyResolvedBugException
-        ) as e:
-            logging.exception('Known 400 exception')
-            return BadRequestResponse(body=message_body(e.message)).api_dict()
-
-        # 401 Unauthorized Errors
-        except MissingAuthHeaderException as e:
-            logging.exception('Known 401 exception')
-            return UnAuthorizedResponse(body=message_body(e.message)).api_dict()
-        # 403 Forbidden Errors
-        except UnauthorizedProjectAccessException as e:
-            logging.exception('Known 403 exception')
-            return ForbiddenResponse(body=message_body(e.message)).api_dict()
-
-        # 404 Errors
-        except NotFoundException as e:
-            logging.exception('Known 404 exception')
-            return NotFoundResponse(body=message_body(e.message)).api_dict()
-
-        # 500 Errors
-        except (ManagerNotFoundException, MultipleMatchException) as e:
-            logging.exception('Known 500 exception')
-            return InternalServerErrorResponse(body=message_body(e.message)).api_dict()
-        except Exception:
-            logging.exception('Unknown 500 exception. Returning Internal server error response')
-            return InternalServerErrorResponse(body=message_body('Internal server error')).api_dict()
-
-    return wrapper
-
-
-def log_event_response(handler: Callable[[P], R]) -> Callable[[P], R]:
-    """ Logs the input event and response as JSON """
-
-    @wraps(handler)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-        evt = args[0]
-        logging.info(f'evt = {json.dumps(evt)}')
-        rsp = handler(*args, **kwargs)
-        logging.info(f'rsp = {json.dumps(rsp)}')
-        return rsp
-
-    return wrapper
-
-
-def parse_body(handler: Callable[[P], R]) -> Callable[[P], R]:
-    """ Parse the json str in evt['body'] in place """
-
-    @wraps(handler)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-        evt = args[0]
-        if evt.get('body'):
-            evt['body'] = json.loads(evt['body'])
-        return handler(*args, **kwargs)
-
-    return wrapper
-
-
-def lambda_api_handler(endpoint_details: ApiEndpointDetails) -> Callable[[P], R]:
-    """
-     Wraps all the API decorators in order and
-     adds endpoint description which is used to generate api docs and for generation for API GW infrastructure.
-     This should be attached to all API lambda handlers
-     """
-
-    def decorator(handler: Callable[[P], Awaitable[R]]) -> Callable[[P], R]:
-        @handle_exception_responses
-        @log_event_response
-        @parse_body
         @wraps(handler)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-            return asyncio.run(handler(*args, **kwargs))
+        def wrapper(evt: ApiGatewayEvt, ctx: LambdaContext) -> ApiGatewayRsp:
+            try:
+                # Log un-formatted evt
+                logging.info(f'evt = {json.dumps(evt)}')
 
-        wrapper.endpoint_details = endpoint_details
+                # Parse request body
+                if evt.get('body'):
+                    evt['body'] = json.loads(evt['body'])
+
+                # Run async handler
+                http_rsp = asyncio.run(handler(evt, ctx, endpoint_details))
+
+            except ApiException as e:
+                logging.exception('Known API exception')
+                http_rsp = e.get_api_response()
+
+            except Exception:
+                logging.exception('Unknown exception. Returning Internal server error response')
+                http_rsp = HttpResponse(
+                    status_code=HttpStatusCode.INTERNAL_SERVER_ERROR_STATUS,
+                    body=message_body('Internal server error')
+                )
+
+            # Convert Rsp to Api Gw dict
+            api_gw_dict = http_rsp.api_dict()
+
+            # Log Rsp & Evt
+            logging.info(f'evt = {json.dumps(evt)}\nrsp = {json.dumps(api_gw_dict)}')
+
+            return api_gw_dict
+
         return wrapper
 
     return decorator

@@ -9,12 +9,14 @@ coverage = "*"
 apispec = "*"
 pyyaml = "*"
 mypy = "*"
+types-python-dateutil = "*"
 
 [packages]
 pynamodb = "*"
 arrow = "*"
 requests = "*"
 pydantic = "*"
+aws-lambda-powertools = "*"
 
 [requires]
 python_version = "3.9"

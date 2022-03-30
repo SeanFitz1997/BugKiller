@@ -17,5 +17,9 @@ def get_object_public_methods(obj: Any) -> List[Callable]:
 
 def get_local_function_in_module(module: ModuleType) -> List[Callable]:
     functions = get_object_public_methods(module)
-    local_functions = [f for f in functions if f.__module__ == module.__name__]
+    local_functions = [f for f in functions if is_local_to_model(f, module)]
     return local_functions
+
+
+def is_local_to_model(obj: object, module: ModuleType) -> bool:
+    return obj.__module__ == module.__name__

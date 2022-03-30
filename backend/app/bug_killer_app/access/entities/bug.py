@@ -3,6 +3,7 @@ from typing import Tuple
 
 import arrow
 
+from bug_killer_api_interface.schemas.request.bug import UpdateBugPayload, CreateBugPayload
 from bug_killer_app.access.datastore.bug import create_bug_item, resolve_bug_item, get_bug_item_by_id, \
     update_bug_item
 from bug_killer_app.access.entities.permission import assert_user_has_project_manager_access, \
@@ -11,8 +12,6 @@ from bug_killer_app.access.entities.project import get_project
 from bug_killer_app.domain.exceptions import EmptyUpdateException, AlreadyResolvedBugException
 from bug_killer_app.models.bug import BkAppBug
 from bug_killer_app.models.bug_resolution import BkAppBugResolution
-from bug_killer_schemas.request.bug import CreateBugPayload
-from bug_killer_schemas.request.project import UpdateProjectPayload
 from bug_killer_utils.collections import is_dict_empty
 
 
@@ -35,7 +34,7 @@ async def create_project_bug(user_id: str, payload: CreateBugPayload) -> BkAppBu
     return BkAppBug.from_db_item(bug_item)
 
 
-async def update_project_bug(user_id: str, bug_id: str, payload: UpdateProjectPayload) -> Tuple[str, BkAppBug]:
+async def update_project_bug(user_id: str, bug_id: str, payload: UpdateBugPayload) -> Tuple[str, BkAppBug]:
     logging.info(f'Updating bug {bug_id} with {payload = }')
 
     if is_dict_empty(payload.api_dict()):

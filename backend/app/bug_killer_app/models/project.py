@@ -5,7 +5,7 @@ import arrow
 from bug_killer_app.datastore.project_table.project_item import ProjectItem, ProjectAssociationPrefix
 from bug_killer_app.domain.types import AllProjectItems
 from bug_killer_app.models.bug import BkAppBug
-from bug_killer_schemas.entities.project import Project
+from bug_killer_api_interface.schemas.entities.project import Project
 from bug_killer_utils.strings import remove_prefix
 
 
@@ -42,6 +42,11 @@ class BkAppProject(Project):
         )
 
     def to_db_items(self) -> AllProjectItems:
+        if all(isinstance(bug, BkAppBug) for bug in self.bugs):
+            bug_items = [bug.to_db_item(project_id=self.id) for bug in self.bugs]  # type: ignore[attr-defined]
+        else:
+            raise ValueError(f'BkAppProject bugs must be a list of BkAppBug')
+
         project_item = ProjectItem(
             project_id=self.id,
             project_association=ProjectAssociationPrefix.PROJECT.value + self.id,
@@ -58,7 +63,5 @@ class BkAppProject(Project):
             ProjectItem(self.id, ProjectAssociationPrefix.MEMBER.value + member)
             for member in self.members
         ]
-
-        bug_items = [bug.to_db_item(project_id=self.id) for bug in self.bugs]
 
         return project_item, manager_item, member_items, bug_items

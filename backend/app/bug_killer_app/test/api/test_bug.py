@@ -2,18 +2,18 @@ import json
 from unittest import TestCase
 from unittest.mock import patch
 
+from bug_killer_api_interface.schemas.entities.bug import BugResolution
+from bug_killer_api_interface.schemas.request.bug import CreateBugPayload, UpdateBugPayload
+from bug_killer_api_interface.schemas.request.project import CreateProjectPayload
+from bug_killer_api_interface.schemas.response.bug import BugResponse
 from bug_killer_app.access.entities.bug import create_project_bug, resolve_project_bug
 from bug_killer_app.access.entities.project import create_project
 from bug_killer_app.api.bug import get_bug_handler, create_bug_handler, update_bug_handler, resolve_bug_handler, \
     delete_bug_handler
-from bug_killer_app.domain.response import HttpStatusCodes, message_body
+from bug_killer_app.domain.response import HttpStatusCode, message_body
 from bug_killer_app.test.helpers import create_event, assert_response, assert_dict_attributes_not_none, \
     assert_dict_attributes_equals, create_cognito_authorizer_request_context
 from bug_killer_app.test.test_doubles.db.transact_write import DummyTransactWrite
-from bug_killer_schemas.entities.bug import BugResolution
-from bug_killer_schemas.request.bug import UpdateBugPayload, CreateBugPayload
-from bug_killer_schemas.request.project import CreateProjectPayload
-from bug_killer_schemas.response.bug import BugResponse
 from bug_killer_utils.dates import to_utc_str
 from bug_killer_utils.function import run_async
 
@@ -45,7 +45,7 @@ class TestGetBug(TestCase):
         rsp = get_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_error_when_missing_id(self):
         # Given
@@ -57,7 +57,7 @@ class TestGetBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('Missing required pathParameters parameter "bugId" in request')
         )
 
@@ -73,7 +73,7 @@ class TestGetBug(TestCase):
         rsp = get_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.NOT_FOUND_STATUS, message_body(f'No bug found with id: "{bug_id}"'))
+        assert_response(rsp, HttpStatusCode.NOT_FOUND_STATUS, message_body(f'No bug found with id: "{bug_id}"'))
 
     def test_error_when_user_lacks_permission(self):
         # Given
@@ -89,7 +89,7 @@ class TestGetBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.FORBIDDEN_STATUS,
+            HttpStatusCode.FORBIDDEN_STATUS,
             message_body(f'{user} does not have permission to read project {self.project_with_bug.id}')
         )
 
@@ -106,7 +106,7 @@ class TestGetBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.OK_STATUS,
+            HttpStatusCode.OK_STATUS,
             BugResponse(project_id=self.project_with_bug.id, bug=self.bug_to_get).api_dict()
         )
 
@@ -132,7 +132,7 @@ class TestCreateBug(TestCase):
         rsp = create_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_error_when_missing_project_id(self):
         # Given
@@ -144,7 +144,7 @@ class TestCreateBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('Missing required body parameter "projectId" in request')
         )
 
@@ -162,7 +162,7 @@ class TestCreateBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.FORBIDDEN_STATUS,
+            HttpStatusCode.FORBIDDEN_STATUS,
             message_body(f'{user} does not have permission to update project {self.project.id}')
         )
 
@@ -180,7 +180,7 @@ class TestCreateBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.NOT_FOUND_STATUS,
+            HttpStatusCode.NOT_FOUND_STATUS,
             message_body(f'No project found with id: "{project_id}"')
         )
 
@@ -196,7 +196,7 @@ class TestCreateBug(TestCase):
         rsp = create_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.CREATED_STATUS)
+        assert_response(rsp, HttpStatusCode.CREATED_STATUS)
         assert json.loads(rsp['body'])['projectId'] is not None
         bug = json.loads(rsp['body'])['bug']
         assert_dict_attributes_not_none(bug, ['id', 'createdOn', 'lastUpdatedOn'])
@@ -234,7 +234,7 @@ class TestUpdateBug(TestCase):
         rsp = update_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_error_when_missing_project_id(self):
         # Given
@@ -246,7 +246,7 @@ class TestUpdateBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('Missing required pathParameters parameter "bugId" in request')
         )
 
@@ -264,7 +264,7 @@ class TestUpdateBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('No changes provided in update payload')
         )
 
@@ -283,7 +283,7 @@ class TestUpdateBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.NOT_FOUND_STATUS,
+            HttpStatusCode.NOT_FOUND_STATUS,
             message_body(f'No bug found with id: "{bug_id}"')
         )
 
@@ -301,7 +301,7 @@ class TestUpdateBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('All changes in payload matches the existing record')
         )
 
@@ -320,7 +320,7 @@ class TestUpdateBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.FORBIDDEN_STATUS,
+            HttpStatusCode.FORBIDDEN_STATUS,
             message_body(f'{user} does not have permission to read project {self.project.id}')
         )
 
@@ -338,7 +338,7 @@ class TestUpdateBug(TestCase):
         rsp = update_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.OK_STATUS)
+        assert_response(rsp, HttpStatusCode.OK_STATUS)
         assert json.loads(rsp['body'])['projectId'] is not None
         bug = json.loads(rsp['body'])['bug']
         assert_dict_attributes_equals(
@@ -384,7 +384,7 @@ class TestResolveBug(TestCase):
         rsp = resolve_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_error_when_no_bug_id(self):
         # Given
@@ -396,7 +396,7 @@ class TestResolveBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('Missing required pathParameters parameter "bugId" in request')
         )
 
@@ -414,7 +414,7 @@ class TestResolveBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.NOT_FOUND_STATUS,
+            HttpStatusCode.NOT_FOUND_STATUS,
             message_body(f'No bug found with id: "{bug_id}"')
         )
 
@@ -432,7 +432,7 @@ class TestResolveBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.FORBIDDEN_STATUS,
+            HttpStatusCode.FORBIDDEN_STATUS,
             message_body(f'{user} does not have permission to read project {self.project.id}')
         )
 
@@ -449,7 +449,7 @@ class TestResolveBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body(
                 f'Bug {self.resolved_bug.id} has already been resolved by {self.resolved_bug.resolved.resolver_id} '
                 f'on {self.resolved_bug.resolved.resolved_on}'
@@ -467,7 +467,7 @@ class TestResolveBug(TestCase):
         rsp = resolve_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.OK_STATUS)
+        assert_response(rsp, HttpStatusCode.OK_STATUS)
         bug_resolution = BugResolution.parse_obj(json.loads(rsp['body'])['bug']['resolved'])
         assert bug_resolution.resolver_id == self.USER1
         assert bug_resolution.resolved_on is not None
@@ -497,7 +497,7 @@ class TestDeleteBug(TestCase):
         rsp = delete_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
+        assert_response(rsp, HttpStatusCode.UNAUTHORIZED_STATUS, message_body('Missing authorization header value'))
 
     def test_error_when_bug_id_not_given(self):
         # Given
@@ -509,7 +509,7 @@ class TestDeleteBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.BAD_REQUEST_STATUS,
+            HttpStatusCode.BAD_REQUEST_STATUS,
             message_body('Missing required pathParameters parameter "bugId" in request')
         )
 
@@ -525,7 +525,7 @@ class TestDeleteBug(TestCase):
         rsp = delete_bug_handler(evt, None)
 
         # Then
-        assert_response(rsp, HttpStatusCodes.NOT_FOUND_STATUS, message_body(f'No bug found with id: "{bug_id}"'))
+        assert_response(rsp, HttpStatusCode.NOT_FOUND_STATUS, message_body(f'No bug found with id: "{bug_id}"'))
 
     def test_user_deletes_project(self):
         # Given
@@ -540,6 +540,6 @@ class TestDeleteBug(TestCase):
         # Then
         assert_response(
             rsp,
-            HttpStatusCodes.OK_STATUS,
+            HttpStatusCode.OK_STATUS,
             BugResponse(project_id=self.project.id, bug=self.bug_to_delete).api_dict()
         )

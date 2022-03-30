@@ -1,10 +1,10 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from arrow import Arrow
 from pydantic.fields import ModelField
 from pydantic.schema import field_schema
 
-from bug_killer_utils.dates import try_parse_arrow
+from bug_killer_utils.dates import parse_arrow
 
 
 class ArrowType(Arrow):
@@ -15,11 +15,14 @@ class ArrowType(Arrow):
 
     @classmethod
     def validate(cls, value: Any) -> Arrow:
-        return try_parse_arrow(value)
+        return parse_arrow(value)
 
     @classmethod
-    def __modify_schema__(cls, schema: Dict[str, Any], field: Optional[ModelField]):
+    def __modify_schema__(cls, schema: dict[str, Any], field: Optional[ModelField]):
         """ Change the type of arrow to str when generating the schema """
+        if not field:
+            return
+
         # Create copy of existing field,
         # change the data type to str, and then delete __modify_schema__ to prevent recursion
         field_copy = ModelField(

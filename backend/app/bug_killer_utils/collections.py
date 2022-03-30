@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import List, Union, Dict, Any, Optional, TypeVar
+from typing import List, Dict, Any, Optional, TypeVar
 
 from bug_killer_utils.strings import snake_case_to_camel_case, camel_case_to_snake_case
 
@@ -7,7 +9,7 @@ from bug_killer_utils.strings import snake_case_to_camel_case, camel_case_to_sna
 T = TypeVar('T')
 
 
-def flatten(lst: List[Union[List, T]]) -> List[T]:
+def flatten(lst: list | tuple) -> list:
     if len(lst) == 0:
         return []
 
@@ -16,7 +18,7 @@ def flatten(lst: List[Union[List, T]]) -> List[T]:
     return flat_head + flatten(tail)
 
 
-def add_to_dict_if_exists(data: Dict, key: Any, value: Optional[Any]) -> Dict:
+def add_to_dict_if_exists(data: dict, key: Any, value: Optional[Any]) -> None:
     if value is not None:
         data[key] = value
 

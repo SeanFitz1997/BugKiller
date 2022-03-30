@@ -19,3 +19,5 @@ def get_or_create_eventloop() -> AbstractEventLoop:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             return asyncio.get_event_loop()
+        else:
+            raise
